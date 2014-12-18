@@ -1,0 +1,11 @@
+**/bin/
+**/Debug/
+**/obj/
+**/*.opensdf
+**/*.sdf
+**/*.suo
+**/*.log
+**/~*.docx
+**/*.csproj.user
+/packages
+

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Client">
+      <UniqueIdentifier>{d2dc7e4e-f764-4b77-bdb0-db84f6bc4def}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{daa02727-5aba-4251-be51-51ccd1447238}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared\Messaging">
+      <UniqueIdentifier>{5ffd27ef-0a22-4acb-873d-2db39eeae52c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared\DesignPatterns">
+      <UniqueIdentifier>{5cdda523-fba3-4cff-8799-e21c2161f966}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Client\Connector.hpp">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Client\Scraper.hpp">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Client\TCPClient.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Client\TCPConnector.hpp">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Messaging\Response.h">
+      <Filter>Shared\Messaging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\DesignPatterns\Singleton.hpp">
+      <Filter>Shared\DesignPatterns</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClientServerFramework.cpp" />
+  </ItemGroup>
+</Project>
