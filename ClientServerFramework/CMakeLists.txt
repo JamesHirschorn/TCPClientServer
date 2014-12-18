@@ -1,10 +1,4 @@
-# Collect sources into the variable MATH_SOURCES without
-# having to explicitly list each header and source file.
-#
-# CMake documentation states "We do not recommend using GLOB to collect a list of
-# source files from your source tree. If no CMakeLists.txt file changes when a 
-# source is added or removed then the generated build system cannot know when to 
-# ask CMake to regenerate".
+# Collect the sources (including header files) into per-folder variables.
 file(GLOB SOURCES "*.cpp" "*.hpp")
 file(GLOB CLIENT_SOURCES "Client/*.h" "Client/*.hpp" "Client/*.cpp")
 #file(GLOB CLIENTSERVER_SOURCES "CleintServer/*.hpp")
@@ -15,20 +9,8 @@ file(GLOB SHARED_DESIGNPATTERNS_SOURCES "Shared/DesignPatterns/*.hpp")
 set(ALL_SOURCES ${SOURCES};${CLIENT_SOURCES};${CLIENTSERVER_SOURCES};${SHARED_SOURCES};${SHARED_MESSAGING_SOURCES};${SHARED_DESIGNPATTERNS_SOURCES})
 #message("Sources: " ${ALL_SOURCES})
 
-# Collect sources into the variable SIMPLE_FUNCTION_SOURCES
-#file (GLOB SIMPLE_FUNCTION_SOURCES
-#      "simple/*.h",
-#      "simple/*.cxx")
-
-# The recommended way to collect sources in variable 
-# ADVANCED_FUNCTION_SOURCES by explicitly specifying the source files
-#set  (ADVANCED_FUNCTION_SOURCES
-#      "advanced/AdvancedFunctions.h"
-#      "advanced/AdvancedFunctions.cxx")
-
-# Create named folders for the sources within the .vcproj
-# Empty name lists them directly under the .vcproj
-set(BASE_DIR "ClientServerFramework")
+# Set up folders in Visual Studio.
+set(BASE_DIR "Source Files")
 source_group(${BASE_DIR} FILES ${SOURCES})
 source_group("${BASE_DIR}\\Client" FILES ${CLIENT_SOURCES})
 #source_group("${BASE_DIR}\\ClientServer" FILES ${CLIENTSERVER_SOURCES})

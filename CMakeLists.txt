@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.0)
 
 # Maps to Visual Studio solution file (Tutorial.sln)
 # The solution will have all targets (exe, lib, dll) 
@@ -18,6 +18,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Useful for displaying errors, warnings, and debugging
 #message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
+# For some reason, CMake fails when the specific libraries are required.
+# We use link_directories as a work around (see below).
 find_package(Boost 1.57 REQUIRED)
 if(NOT ${Boost_FOUND})
 	set(BOOST_ROOT $ENV{Boost_DIR} CACHE PATH "Boost library root directory")
@@ -27,6 +29,8 @@ endif(NOT ${Boost_FOUND})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if(${Boost_FOUND})
 	include_directories(${Boost_INCLUDE_DIRS})
+	# Work around.
+	link_directories(${Boost_LIBRARY_DIRS})
 endif(${Boost_FOUND})
 
 # Set the following preprocessor flag, if necessary.
@@ -45,4 +49,4 @@ add_definitions(-D_WIN32_WINNT=${ver})
 
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(ClientServerFramework)
-add_subdirectory(CalculatorTCPClient)
+add_subdirectory(CalculatorServer)

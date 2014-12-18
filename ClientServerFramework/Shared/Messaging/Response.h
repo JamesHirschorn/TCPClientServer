@@ -1,12 +1,15 @@
-/* Base class for server responses. */
+/* Struct for server responses. */
+
+#include <string>
 
 namespace ClientServer {
 
-	enum TransmitionStatus {OK, ERROR};
+	enum TransmitionStatus {OK, BAD};
 
 	struct Response
 	{
-		TransmitionStatus transmition_status;
+		TransmitionStatus	transmission_status;
+		std::string			message;
 	};
 
 }	// namespace TCPClientServer

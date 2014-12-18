@@ -1,3 +1,4 @@
+#include <string>
 #include <utility>
 
 #include <boost/asio/ip/tcp.hpp>
@@ -7,16 +8,13 @@
 namespace ClientServer {
 
 	template<typename Data>
-	class TCPConnector : public Connector
+	class TCPConnector : 
+		public Connector<boost::asio::ip::tcp, Data>
 	{
 	public:
 		TCPConnector(std::string const& host, std::string const& service)
-			: Connector(host, string), 
-			// NO: preferable to use a move-ctor here
-			resolver(io_service)
+			: Connector(host, service)
 		{
 		}
-	private:
-		tcp::resolver resolver_;
 	};
 }
