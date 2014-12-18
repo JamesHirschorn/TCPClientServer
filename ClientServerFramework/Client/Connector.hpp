@@ -15,10 +15,11 @@ namespace ClientServer
 	class Connector
 	{
 	public:
-		Connector(std::string const& host, std::string const& service) :
-			resolver_(io_service_), 
+		Connector(
+			boost::asio::io_service& io_service, std::string const& host, std::string const& service) :
+			resolver_(io_service), 
 			query_(host, service),
-			socket_(io_service_)
+			socket_(io_service)
 		{}
 
 		bool open()
@@ -64,7 +65,6 @@ namespace ClientServer
 			return result;
 		}
 	private:
-		boost::asio::io_service io_service_;
 		typedef typename InternetProtocol::resolver resolver_type;
 		resolver_type resolver_;
 		typedef typename resolver_type::query query_type;
