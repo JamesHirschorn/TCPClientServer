@@ -1,5 +1,8 @@
 /* Struct for server responses. */
 
+#ifndef CLIENT_SERVER_RESPONSE_H
+#define CLIENT_SERVER_RESPONSE_H
+
 #include <string>
 
 namespace ClientServer {
@@ -13,3 +16,5 @@ namespace ClientServer {
 	};
 
 }	// namespace TCPClientServer
+
+#endif	// !CLIENT_SERVER_RESPONSE_H

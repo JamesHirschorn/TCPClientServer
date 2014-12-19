@@ -1,21 +1,23 @@
 # Collect the sources (including header files) into per-folder variables.
 file(GLOB SOURCES "*.cpp" "*.hpp")
 file(GLOB CLIENT_SOURCES "Client/*.h" "Client/*.hpp" "Client/*.cpp")
+file(GLOB SERVER_SOURCES "Server/*.hpp" "Server/*.h")
 #file(GLOB CLIENTSERVER_SOURCES "CleintServer/*.hpp")
 file(GLOB SHARED_SOURCES "Shared/*.hpp")
-file(GLOB SHARED_MESSAGING_SOURCES "Shared/Messaging/*.h" "Shared/Messaging/*.hpp")
+#file(GLOB SHARED_MESSAGING_SOURCES "Shared/Messaging/*.h" "Shared/Messaging/*.hpp")
 file(GLOB SHARED_DESIGNPATTERNS_SOURCES "Shared/DesignPatterns/*.hpp")
 
-set(ALL_SOURCES ${SOURCES};${CLIENT_SOURCES};${CLIENTSERVER_SOURCES};${SHARED_SOURCES};${SHARED_MESSAGING_SOURCES};${SHARED_DESIGNPATTERNS_SOURCES})
+set(ALL_SOURCES ${SOURCES};${CLIENT_SOURCES};${SERVER_SOURCES};${SHARED_SOURCES};${SHARED_MESSAGING_SOURCES};${SHARED_DESIGNPATTERNS_SOURCES})
 #message("Sources: " ${ALL_SOURCES})
 
 # Set up folders in Visual Studio.
 set(BASE_DIR "Source Files")
 source_group(${BASE_DIR} FILES ${SOURCES})
 source_group("${BASE_DIR}\\Client" FILES ${CLIENT_SOURCES})
+source_group("${BASE_DIR}\\Server" FILES ${SERVER_SOURCES})
 #source_group("${BASE_DIR}\\ClientServer" FILES ${CLIENTSERVER_SOURCES})
 source_group("${BASE_DIR}\\Shared" FILES ${SHARED_SOURCES})
-source_group("${BASE_DIR}\\Shared\\Messaging" FILES ${SHARED_MESSAGING_SOURCES})
+#source_group("${BASE_DIR}\\Shared\\Messaging" FILES ${SHARED_MESSAGING_SOURCES})
 source_group("${BASE_DIR}\\Shared\\DesignPatterns" FILES ${SHARED_DESIGNPATTERNS_SOURCES})
 
 # Properties->C/C++->General->Additional Include Directories

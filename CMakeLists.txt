@@ -49,4 +49,5 @@ add_definitions(-D_WIN32_WINNT=${ver})
 
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(ClientServerFramework)
-add_subdirectory(CalculatorServer)
+#add_subdirectory(ClientServerCalculator)
+add_subdirectory(ClientServerStringReversal)

@@ -7,7 +7,7 @@
 
 namespace ClientServer {
 
-	template<typename InternetProtocol>
+	template<typename InternetProtocol, typename SessionType>
 	class AsyncServer
 	{
 	public:
@@ -31,7 +31,7 @@ namespace ClientServer {
 					// This is much more succinct and (I believe) efficient than
 					// the "old-fashioned way" of created a new socket by hand 
 					// for each new Session. 
-					std::make_shared<Session>(std::move(socket_))->start();
+					std::make_shared<SessionType>(std::move(socket_))->start();
 				}
 
 				do_accept();

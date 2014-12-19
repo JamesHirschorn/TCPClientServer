@@ -7,7 +7,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
-#include <ClientServerFramework/Shared/Messaging/Response.h>
+#include <ClientServerFramework/Server/Response.h>
 
 namespace ClientServer
 {
