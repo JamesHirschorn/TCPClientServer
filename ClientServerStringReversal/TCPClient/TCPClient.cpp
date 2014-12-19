@@ -27,13 +27,13 @@ int main(int argc, char* argv[])
 			exit(EXIT_FAILURE);
 		}
 
-		data d = { 3, 0.5, "Testing..." };
+		data d = { 3, 0.5555555555555555, "Request 1" };
 
 		cout << "Sending message to server..." << endl;
 
 		auto response = conn.send(d);
 
-		cout << "Received response from server: " << response.data << endl;
+		cout << "Received response from server. " << response.data << endl;
 	}
 	catch (exception& e)
 	{

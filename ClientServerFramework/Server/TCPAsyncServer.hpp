@@ -1,3 +1,8 @@
+/**
+*	Specialization the AsyncServer class for the TCP internet protocol.
+*	See AsyncServer.hpp for documentation.
+*/
+
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 

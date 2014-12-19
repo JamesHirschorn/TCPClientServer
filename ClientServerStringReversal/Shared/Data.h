@@ -3,13 +3,15 @@
 #ifndef CLIENT_SERVER_DATA
 #define CLIENT_SERVER_DATA
 
+#include <cstdint>
 #include <string>
 
 struct data
 {
-	int64_t		integer;
-	double		real;
-	std::string id;
+	std::string	request;	// request
+	int32_t		id;			// request id
+	int64_t		integer;	// integer used in calculation
+	double		real;		// real number used in calculation
 
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int version)

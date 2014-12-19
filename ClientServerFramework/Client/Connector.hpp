@@ -85,7 +85,7 @@ namespace ClientServer
 		}
 
 		/// The connection to the server.
-		Connection connection_;
+		Connection<InternetProtocol> connection_;
 
 		typedef typename InternetProtocol::resolver resolver_type;
 		resolver_type resolver_;

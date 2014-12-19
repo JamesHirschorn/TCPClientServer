@@ -1,3 +1,8 @@
+/** 
+ *	Specialization the Session class for the TCP internet protocol. 
+ *	See Session.hpp for documentation.
+ */
+
 #include <boost/asio/ip/tcp.hpp>
 
 #include <ClientServerFramework/Server/Session.hpp>

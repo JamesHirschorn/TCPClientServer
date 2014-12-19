@@ -1,6 +1,7 @@
 /**
- * 1. Added synchronzied read and write to the boost::asio example.
- * 2. Clean up async_read and async_write to work with lambdas.
+ * 1. Added synchronzied read and write to the boost::asio serialization example.
+ * 2. Major clean up, so that now async_read and async_write to work with lambdas.
+ * 3. Templated for the internet protocol.
  *
  * (C) James Hirschorn 2014
  */
@@ -38,8 +39,10 @@ namespace ClientServer {
 	* hexadecimal.
 	* @li The serialized data.
 	*/
+	template<typename InternetProtocol>
 	class Connection
 	{
+		typedef typename InternetProtocol::socket socket_type;
 	public:
 		/// Constructor.
 		Connection(boost::asio::io_service& io_service)
@@ -49,14 +52,14 @@ namespace ClientServer {
 
 		/// Get the underlying socket. Used for making a Connection or for accepting
 		/// an incoming connection.
-		boost::asio::ip::tcp::socket& socket()
+		socket_type& socket()
 		{
 			return socket_;
 		}
 
 		/// Asynchronously write a data structure to the socket.
 		template <typename T, typename Handler>
-		void async_write(const T& t, Handler handler)
+		void async_write(T const& t, Handler const& handler)
 		{
 			// Serialize the data first so we know how large it is.
 			std::ostringstream archive_stream;
@@ -71,11 +74,10 @@ namespace ClientServer {
 			if (!header_stream || header_stream.str().size() != header_length)
 			{
 				// Something went wrong, inform the caller.
-				handler(boost::asio::error::invalid_argument, 0);
+				handler(boost::asio::error::invalid_argument, header_length);
 				//boost::system::error_code error(boost::asio::error::invalid_argument);
 				//socket_.get_io_service().post(boost::bind(handler, error));
 				return;
-				//throw boost::system::system_error(error);
 			}
 			outbound_header_ = header_stream.str();
 
@@ -87,6 +89,7 @@ namespace ClientServer {
 			boost::asio::async_write(socket_, buffers, handler);
 		}
 
+		/// Synchronized write.
 		template<typename T>
 		void write(T const& t, boost::system::error_code& ec)
 		{
@@ -103,10 +106,9 @@ namespace ClientServer {
 			if (!header_stream || header_stream.str().size() != header_length)
 			{
 				// Something went wrong, inform the caller.
-				boost::system::error_code error(boost::asio::error::invalid_argument);
-				throw boost::system::system_error(error);
+				ec = boost::asio::error::invalid_argument;
 				//socket_.get_io_service().post(boost::bind(handler, error));
-				//return;
+				return;
 			}
 			outbound_header_ = header_stream.str();
 
@@ -116,26 +118,19 @@ namespace ClientServer {
 			buffers.push_back(boost::asio::buffer(outbound_header_));
 			buffers.push_back(boost::asio::buffer(outbound_data_));
 
-			boost::asio::write(socket_, buffers, ec);
+			//boost::asio::write(socket_, buffers, ec);
+			boost::asio::write(socket_, buffers, boost::asio::transfer_all(), ec);
 		}
 
 		/// Asynchronously read a data structure from the socket.
 		template <typename T, typename Handler>
 		void async_read(T& t, Handler const& handler)
 		{
-			// Issue a read operation to read exactly the number of bytes in a header.
-			/*void (Connection::*f)(
-				const boost::system::error_code&,
-				T&, boost::tuple<Handler>)
-				= &Connection::handle_read_header<T, Handler>;*/
 			boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_), 
 				[this,&t,handler](boost::system::error_code const& ec, std::size_t len)
 			{
 				handle_read_header(ec, len, t, handler);
 			});
-				/*boost::bind(f,
-				this, boost::asio::placeholders::error, boost::ref(t),
-				boost::make_tuple(handler)));*/
 		}
 
 		/// Handle a completed read of a message header. The handler is passed using
@@ -148,8 +143,6 @@ namespace ClientServer {
 			if (e)
 			{
 				handler(e, len);
-				//boost::get<0>(handler)(e);
-				//handler(e, 0);
 			}
 			else
 			{
@@ -159,25 +152,17 @@ namespace ClientServer {
 				if (!(is >> std::hex >> inbound_data_size))
 				{
 					// Header doesn't seem to be valid. Inform the caller.
-					boost::system::error_code error(boost::asio::error::invalid_argument);
-					throw boost::system::system_error(error);
-					//boost::get<0>(handler)(error);
-					//return;
+					handler(boost::asio::error::invalid_argument, len);
+					return;
 				}
 
 				// Start an asynchronous call to receive the data.
 				inbound_data_.resize(inbound_data_size);
-				/*void (Connection::*f)(
-					const boost::system::error_code&,
-					T&, boost::tuple<Handler>)
-					= &Connection::handle_read_data<T, Handler>;*/
 				boost::asio::async_read(socket_, boost::asio::buffer(inbound_data_),
 					[this, &t, handler](boost::system::error_code const& ec, std::size_t len)
 				{
 					handle_read_data(ec, len, t, handler);
 				});
-				/* boost::bind(f, this,
-					boost::asio::placeholders::error, boost::ref(t), handler)); */
 			}
 		}
 
@@ -206,7 +191,6 @@ namespace ClientServer {
 				}
 
 				// Inform caller that data has been received ok.
-				//boost::get<0>(handler)(e);
 				handler(ec, len);
 			}
 		}
@@ -227,7 +211,7 @@ namespace ClientServer {
 			if (!(is >> std::hex >> inbound_data_size))
 			{
 				// Header doesn't seem to be valid. Inform the caller.
-				ec = boost::system::error_code(boost::asio::error::invalid_argument);
+				ec = boost::asio::error::invalid_argument;
 				return;
 			}
 
@@ -251,7 +235,7 @@ namespace ClientServer {
 		}
 	private:
 		/// The underlying socket.
-		boost::asio::ip::tcp::socket socket_;
+		socket_type socket_;
 
 		/// The size of a fixed length header.
 		enum { header_length = 8 };
@@ -269,6 +253,6 @@ namespace ClientServer {
 		std::vector<char> inbound_data_;
 	};
 
-} // namespace s11n_example
+}	// namespace ClientServer
 
 #endif // SERIALIZATION_CONNECTION_HPP

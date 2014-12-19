@@ -1,3 +1,13 @@
+/** 
+ *	This is a generic Client Server session with 
+ *	1. Asynchronous communication,
+ *	2. Serialized data transfer.
+ * 
+ *	The entire communication session between a client and the server, between
+ *	when the connection is made and when the connection is dropped, is 
+ *  encapsulated in this object.
+ */
+
 #ifndef CLIENT_SERVER_SESSION_HPP
 #define CLIENT_SERVER_SESSION_HPP
 
@@ -11,7 +21,14 @@
 #include <ClientServerFramework/Server/Response.hpp>
 
 namespace ClientServer {
-	
+
+	/// The Strategy Pattern is used here, as a functor given by a template parameter.
+	/// It determines what action the server performs on the data sent from the client.
+	/// Ideally, the strategy should be asynchronous, or only block for very short 
+	/// durations, because otherwise is will block the single thread where all the 
+	/// asynchronous communication occurs, and will thus block clients from communicating
+	/// with the server.
+	///
 	/// Note: enabled_shared_from_this is used to ensure that the session remains alive
 	///		  as long as some operation refers to it.
 	template<typename InternetProtocol, typename Strategy, typename ClientData, typename ServerData>
@@ -23,7 +40,7 @@ namespace ClientServer {
 	public:
 		typedef std::shared_ptr<Session> pointer_type;
 
-		/// factory method
+		/// factory method (only way to creat new Session`s).
 		static pointer_type create(boost::asio::io_service& io_service)
 		{
 			return pointer_type(new Session(io_service));
@@ -31,7 +48,8 @@ namespace ClientServer {
 
 		void start()
 		{
-			std::cerr << "Client connection with session id " << session_id_ << "." << std::endl;
+			// Session has does some very basic logging.
+			std::clog << "Client connection with session id " << session_id_ << "." << std::endl;
 			// Start receiving data from the client.
 			do_receive();
 		}
@@ -47,13 +65,13 @@ namespace ClientServer {
 			connection_(io_service)
 		{
 			session_id_ = count++;
-			std::cerr << "Creating session " << session_id_ << std::endl;
+			std::clog << "Creating session " << session_id_ << std::endl;
 		}
 	public:
 		// dtor
 		~Session()
 		{
-			std::cerr << "Session " << session_id_ << " closing." << std::endl;
+			std::clog << "Session " << session_id_ << " closing." << std::endl;
 		}
 	private:
 		/// session counter
@@ -63,87 +81,24 @@ namespace ClientServer {
 		{
 			using namespace boost::asio;
 
-			//auto self(shared_from_this());
-
-			//std::array<char, max_read_size> a;
-
-			//boost::system::error_code ec;
-			//size_t len = socket_.read_some(buffer(a), ec);
-
-			//ClientData cdata;
-
-			receive_helper helper(shared_from_this());
+			auto self(shared_from_this());
 
 			// Capturing self with the lambda expression ensures that the Session remains alive
-			// until the handler is called and completed (and possibly longer).
+			// until the handler has completed executing (and possibly longer).
 			connection_.async_read(cdata_, 
-				[helper](boost::system::error_code const& ec, std::size_t length)
+				[this,self](boost::system::error_code const& ec, std::size_t length)
 			{
-				helper.handler(ec, length);
-			});
-				/*boost::bind(
-					&Session::handle_receive,
-					shared_from_this(),
-					boost::asio::placeholders::error,
-					boost::asio::placeholders::bytes_transferred));*/
-	/*			[this,&self,&cdata](boost::system::error_code const& ec, std::size_t length)
-			{
-				volatile pointer_type keep_alive(self);
-				std::cerr << "Session " << session_id_ << " attempted to receive from client." << std::endl;
+				std::clog << "Session " << session_id_ << " attempting to receive from client." << std::endl;
 				if (!ec)
 				{
 					// perform the strategy on the received data
-					response_.data = strategy_(cdata);
+					response_.data = strategy_(cdata_);
 					response_.transmission_status = OK;
 
 					// reply to the client with response_
 					do_reply();
 				}
-			});*/
-		}
-
-		struct receive_helper
-		{
-
-			receive_helper(receive_helper const& other)
-				: p_(other.p_)
-			{
-				std::cerr << "Shared pointer use count: " << p_.use_count() << ", session id: " << p_->session_id_ << std::endl;
-			}
-
-			explicit receive_helper(pointer_type const& p)
-				: p_(p)
-			{}
-
-			void handler(boost::system::error_code const& ec, std::size_t length) const
-			{
-				p_->handle_receive(ec, length);
-				/*if (!ec)
-				{
-					// perform the strategy on the received data
-					Session::response_.data = strategy_(cdata_);
-					response_.transmission_status = OK;
-
-					// reply to the client with response_
-					do_reply();
-				}*/
-			}
-
-		private:
-			pointer_type p_;
-		};
-
-		void handle_receive(boost::system::error_code const& ec, std::size_t length)
-		{
-			if (!ec)
-			{
-				// perform the strategy on the received data
-				response_.data = strategy_(cdata_);
-				response_.transmission_status = OK;
-
-				// reply to the client with response_
-				do_reply();
-			}
+			});
 		}
 
 		void do_reply()
@@ -163,7 +118,7 @@ namespace ClientServer {
 			});
 		}
 
-		Connection connection_;
+		Connection<InternetProtocol> connection_;
 		Strategy strategy_;			// The default constructed functor is used.
 		ClientData cdata_;
 		Response<ServerData> response_;
