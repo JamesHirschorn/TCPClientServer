@@ -5,6 +5,7 @@
 #include <exception>
 #include <iostream>
 #include <istream>
+#include <mutex>
 #include <queue>
 
 #include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
@@ -45,9 +46,10 @@ namespace ClientServer
 					std::cerr << "Error in scraping input data: " << e.what() << std::endl;
 					break;
 				}
-
-				queue_.push(d);
 			}
+
+			// thread-safe write to the queue
+			write_datum(d);
 		}
 
 		/// dtor
@@ -56,8 +58,17 @@ namespace ClientServer
 		/// Abstract member for reading one item of data.
 		virtual Data get_datum() = 0;
 
-		istream& is_;
+		// We lock the queue before writing to it, since the queue will be 
+		// accessed outside this thread. 
+		void write_datum(Data const& d)
+		{
+			std::lock_guard<std::mutex> lock(locker_);
+			queue_.push(d);
+		}
+
+		std::istream& is_;
 		Queue& queue_;
+		std::mutex locker_;
 	};
 
 }

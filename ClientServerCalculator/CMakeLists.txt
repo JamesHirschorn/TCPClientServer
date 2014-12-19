@@ -1,1 +1,2 @@
-add_subdirectory(Calculator-TCPClient)
+add_subdirectory(TCPClient)
+add_subdirectory(TCPServer)
