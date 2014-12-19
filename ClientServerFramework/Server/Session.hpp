@@ -13,9 +13,9 @@ namespace ClientServer {
 	
 	/// Note: enabled_shared_from_this is used to ensure that the session remains alive
 	///		  as long as some operation refers to it.
-	template<typename InternetProtocol, typename Action, typename Data>
+	template<typename InternetProtocol, typename Action, typename ClientData, typename ServerData>
 	class Session :
-		public std::enable_shared_from_this<Session<InternetProtocol, Action, Data>>
+		public std::enable_shared_from_this<Session<InternetProtocol, Action, ClientData, ServerData>>
 	{
 	protected:
 		typedef typename InternetProtocol::socket socket_type;
@@ -95,7 +95,7 @@ namespace ClientServer {
 			});
 		}
 
-		socket_type socket_;
+		Connection connection_;
 		Action action_;
 		Response<Data> response_;
 	};

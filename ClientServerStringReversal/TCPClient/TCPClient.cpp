@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
 		boost::asio::io_service io_service;
 
-		TCPConnector<Data, Data> conn(io_service, argv[1], argv[2]);
+		TCPConnector<data, Response<std::string>> conn(io_service, argv[1], argv[2]);
 
 		if (!conn.open())
 		{
@@ -27,8 +27,7 @@ int main(int argc, char* argv[])
 			exit(EXIT_FAILURE);
 		}
 
-		Data d;
-		d = "Testing...";
+		data d = { 3, 0.5, "Testing..." };
 
 		cout << "Sending message to server..." << endl;
 

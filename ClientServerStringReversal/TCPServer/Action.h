@@ -3,12 +3,12 @@
 
 struct Action
 {
-	template<typename Data>
-	void operator()(Data& data) const
+	template<typename T>
+	void operator()(T& data) const
 	{
 		using namespace std;
 
-		Data temp;
+		T temp;
 		temp.resize(data.size());
 
 		copy(data.rbegin(), data.rend(), temp.begin());

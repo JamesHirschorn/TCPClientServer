@@ -1,5 +1,23 @@
-/// A trivial data type.
+/** A serializable data structure. */
+
+#ifndef CLIENT_SERVER_DATA
+#define CLIENT_SERVER_DATA
+
 #include <string>
 
-typedef std::string Data;
+struct data
+{
+	int64_t		integer;
+	double		real;
+	std::string message;
 
+	template <typename Archive>
+	void serialize(Archive& ar, const unsigned int version)
+	{
+		ar & integer;
+		ar & real;
+		ar & message;
+	}
+};
+
+#endif	// !CLIENT_SERVER_DATA

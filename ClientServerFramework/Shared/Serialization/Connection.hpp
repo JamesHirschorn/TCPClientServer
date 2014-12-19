@@ -28,7 +28,7 @@
 #include <sstream>
 #include <vector>
 
-namespace ClientServrer {
+namespace ClientServer {
 
 	/// The connection class provides serialization primitives on top of a socket.
 	/**
@@ -204,11 +204,12 @@ namespace ClientServrer {
 		{
 			using namespace boost::asio;
 
-			read(socket_, buffer(inbound_header_), ec);
+			boost::asio::read(socket_, buffer(inbound_header_), ec);
 
 			if (ec) return;	// an error occurred.
 
 			// Determine the length of the serialized data.
+			std::string s(inbound_header_, header_length);
 			std::istringstream is(std::string(inbound_header_, header_length));
 			std::size_t inbound_data_size = 0;
 			if (!(is >> std::hex >> inbound_data_size))
@@ -219,7 +220,7 @@ namespace ClientServrer {
 			}
 
 			inbound_data_.resize(inbound_data_size);
-			read(socket_, buffer(inbound_data_), ec);
+			boost::asio::read(socket_, buffer(inbound_data_), ec);
 
 			// Extract the data structure from the data just received.
 			try
@@ -233,6 +234,7 @@ namespace ClientServrer {
 			{
 				// Unable to decode data.
 				ec = boost::system::error_code(boost::asio::error::invalid_argument);
+				throw e;
 			}
 		}
 	private:

@@ -35,7 +35,7 @@ namespace ClientServer
 
 			// Attempts to connect to each of the end-points until successful, 
 			// or until all end-points have been tried.
-			auto point = boost::asio::connect(socket_, endpoints, ec);
+			auto point = boost::asio::connect(connection_.socket(), endpoints, ec);
 
 			handle_error(ec);
 

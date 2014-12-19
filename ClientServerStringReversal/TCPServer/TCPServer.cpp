@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
 		boost::asio::io_service io_service;
 
-		TCPAsyncServer<TCPSession<Action, Data>> server(io_service, std::atoi(argv[1]));
+		TCPAsyncServer<TCPSession<Action, std::string>> server(io_service, std::atoi(argv[1]));
 
 		// Start up the server.
 		io_service.run();
