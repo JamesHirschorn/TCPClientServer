@@ -1,5 +1,6 @@
 /**
- * Added synchronzied read and write to the boost::asio example.
+ * 1. Added synchronzied read and write to the boost::asio example.
+ * 2. Clean up async_read and async_write to work with lambdas.
  *
  * (C) James Hirschorn 2014
  */
@@ -70,9 +71,11 @@ namespace ClientServer {
 			if (!header_stream || header_stream.str().size() != header_length)
 			{
 				// Something went wrong, inform the caller.
-				boost::system::error_code error(boost::asio::error::invalid_argument);
-				socket_.get_io_service().post(boost::bind(handler, error));
+				handler(boost::asio::error::invalid_argument, 0);
+				//boost::system::error_code error(boost::asio::error::invalid_argument);
+				//socket_.get_io_service().post(boost::bind(handler, error));
 				return;
+				//throw boost::system::system_error(error);
 			}
 			outbound_header_ = header_stream.str();
 
@@ -118,29 +121,35 @@ namespace ClientServer {
 
 		/// Asynchronously read a data structure from the socket.
 		template <typename T, typename Handler>
-		void async_read(T& t, Handler handler)
+		void async_read(T& t, Handler const& handler)
 		{
 			// Issue a read operation to read exactly the number of bytes in a header.
-			void (Connection::*f)(
+			/*void (Connection::*f)(
 				const boost::system::error_code&,
 				T&, boost::tuple<Handler>)
-				= &Connection::handle_read_header<T, Handler>;
-			boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_),
-				boost::bind(f,
+				= &Connection::handle_read_header<T, Handler>;*/
+			boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_), 
+				[this,&t,handler](boost::system::error_code const& ec, std::size_t len)
+			{
+				handle_read_header(ec, len, t, handler);
+			});
+				/*boost::bind(f,
 				this, boost::asio::placeholders::error, boost::ref(t),
-				boost::make_tuple(handler)));
+				boost::make_tuple(handler)));*/
 		}
 
 		/// Handle a completed read of a message header. The handler is passed using
 		/// a tuple since boost::bind seems to have trouble binding a function object
 		/// created using boost::bind as a parameter.
 		template <typename T, typename Handler>
-		void handle_read_header(const boost::system::error_code& e,
-			T& t, boost::tuple<Handler> handler)
+		void handle_read_header(const boost::system::error_code& e, std::size_t len,
+			T& t, Handler const& handler)
 		{
 			if (e)
 			{
-				boost::get<0>(handler)(e);
+				handler(e, len);
+				//boost::get<0>(handler)(e);
+				//handler(e, 0);
 			}
 			else
 			{
@@ -151,30 +160,35 @@ namespace ClientServer {
 				{
 					// Header doesn't seem to be valid. Inform the caller.
 					boost::system::error_code error(boost::asio::error::invalid_argument);
-					boost::get<0>(handler)(error);
-					return;
+					throw boost::system::system_error(error);
+					//boost::get<0>(handler)(error);
+					//return;
 				}
 
 				// Start an asynchronous call to receive the data.
 				inbound_data_.resize(inbound_data_size);
-				void (Connection::*f)(
+				/*void (Connection::*f)(
 					const boost::system::error_code&,
 					T&, boost::tuple<Handler>)
-					= &Connection::handle_read_data<T, Handler>;
+					= &Connection::handle_read_data<T, Handler>;*/
 				boost::asio::async_read(socket_, boost::asio::buffer(inbound_data_),
-					boost::bind(f, this,
-					boost::asio::placeholders::error, boost::ref(t), handler));
+					[this, &t, handler](boost::system::error_code const& ec, std::size_t len)
+				{
+					handle_read_data(ec, len, t, handler);
+				});
+				/* boost::bind(f, this,
+					boost::asio::placeholders::error, boost::ref(t), handler)); */
 			}
 		}
 
 		/// Handle a completed read of message data.
 		template <typename T, typename Handler>
-		void handle_read_data(const boost::system::error_code& e,
-			T& t, boost::tuple<Handler> handler)
+		void handle_read_data(const boost::system::error_code& ec, std::size_t len,
+			T& t, Handler const& handler)
 		{
-			if (e)
+			if (ec)
 			{
-				boost::get<0>(handler)(e);
+				handler(ec, len);
 			}
 			else
 			{
@@ -188,14 +202,12 @@ namespace ClientServer {
 				}
 				catch (std::exception& e)
 				{
-					// Unable to decode data.
-					boost::system::error_code error(boost::asio::error::invalid_argument);
-					boost::get<0>(handler)(error);
-					return;
+					throw e;
 				}
 
 				// Inform caller that data has been received ok.
-				boost::get<0>(handler)(e);
+				//boost::get<0>(handler)(e);
+				handler(ec, len);
 			}
 		}
 		/// Synchronously read the data from the socket.

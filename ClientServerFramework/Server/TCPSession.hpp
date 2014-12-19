@@ -4,16 +4,13 @@
 
 namespace ClientServer {
 
-	template<typename Action, typename ServerData>
+	template<typename Strategy, typename ClientData, typename ServerData>
 	class TCPSession :
-		public Session<boost::asio::ip::tcp, Action, ServerData>
+		public Session<boost::asio::ip::tcp, Strategy, ClientData, ServerData>
 	{
 	public:
-		TCPSession(socket_type const& socket) : Session(socket) {}
-		TCPSession(socket_type&& socket) 
-			: Session(socket)
-		{
-		}
+		explicit TCPSession(socket_type const& socket) : 
+			Session(socket) {}
 	};
 
 }

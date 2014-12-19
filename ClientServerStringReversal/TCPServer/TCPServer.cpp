@@ -3,8 +3,8 @@
 
 #include <ClientServerFramework/Server/TCPAsyncServer.hpp>
 #include <ClientServerFramework/Server/TCPSession.hpp>
-#include <ClientServerStringReversal/Shared/Data.h>
-#include <ClientServerStringReversal/TCPServer/Action.h>
+#include <ClientServerStringReversal/Shared/data.h>
+#include <ClientServerStringReversal/TCPServer/Action.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -22,7 +22,10 @@ int main(int argc, char* argv[])
 
 		boost::asio::io_service io_service;
 
-		TCPAsyncServer<TCPSession<Action, std::string>> server(io_service, std::atoi(argv[1]));
+		typedef data ClientData;
+		typedef std::string ServerData;
+		typedef Action<ServerData> Strategy;
+		TCPAsyncServer<TCPSession<Strategy, ClientData, ServerData>> server(io_service, std::atoi(argv[1]));
 
 		// Start up the server.
 		io_service.run();

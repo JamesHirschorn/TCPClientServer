@@ -9,14 +9,14 @@ struct data
 {
 	int64_t		integer;
 	double		real;
-	std::string message;
+	std::string id;
 
 	template <typename Archive>
 	void serialize(Archive& ar, const unsigned int version)
 	{
 		ar & integer;
 		ar & real;
-		ar & message;
+		ar & id;
 	}
 };
 
