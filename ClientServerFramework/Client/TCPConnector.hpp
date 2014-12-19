@@ -7,9 +7,9 @@
 
 namespace ClientServer {
 
-	template<typename Data>
+	template<typename ClientData, typename ServerData>
 	class TCPConnector : 
-		public Connector<boost::asio::ip::tcp, Data>
+		public Connector<boost::asio::ip::tcp, ClientData, ServerData>
 	{
 	public:
 		TCPConnector(boost::asio::io_service& io_service, std::string const& host, std::string const& service)

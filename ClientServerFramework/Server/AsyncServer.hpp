@@ -10,9 +10,10 @@ namespace ClientServer {
 	template<typename InternetProtocol, typename SessionType>
 	class AsyncServer
 	{
+		typedef typename InternetProtocol::endpoint endpoint_type;
 	public:
 		AsyncServer(boost::asio::io_service& io_service, short port) :
-			acceptor_(io_service, InternetProtocol::v4(), port),
+			acceptor_(io_service, endpoint_type(InternetProtocol::v4(), port)),
 			socket_(io_service)
 		{
 			do_accept();
@@ -20,18 +21,15 @@ namespace ClientServer {
 	private:
 		void do_accept()
 		{
+			SessionType::pointer_type new_session = SessionType::create(acceptor_.get_io_service());
+
 			// uses a lambda expression for the accept handler
-			acceptor_.async_accept(socket_,
-				[this](boost::system::error_code const& ec)
+			acceptor_.async_accept(new_session->socket(),
+				[this,new_session](boost::system::error_code const& ec)
 			{
 				if (!ec)
 				{
-					// C++11 way of spawning a new Session from a socket.
-					// socket_ will be independent of Session afterwards.
-					// This is much more succinct and (I believe) efficient than
-					// the "old-fashioned way" of created a new socket by hand 
-					// for each new Session. 
-					std::make_shared<SessionType>(std::move(socket_))->start();
+					new_session->start();
 				}
 
 				do_accept();

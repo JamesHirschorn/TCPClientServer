@@ -14,9 +14,15 @@ int main(int argc, char* argv[])
 
 	try
 	{
+		if (argc != 2)
+		{
+			cerr << "Usage: " << argv[0] << " <port>" << endl;
+			exit(EXIT_FAILURE);
+		}
+
 		boost::asio::io_service io_service;
 
-		TCPAsyncServer<TCPSession<Action>> server(io_service, 12345);
+		TCPAsyncServer<TCPSession<Action, Data>> server(io_service, std::atoi(argv[1]));
 
 		// Start up the server.
 		io_service.run();

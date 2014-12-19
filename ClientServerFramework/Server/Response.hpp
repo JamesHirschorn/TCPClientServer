@@ -9,10 +9,11 @@ namespace ClientServer {
 
 	enum TransmitionStatus {OK, BAD};
 
+	template<typename Data>
 	struct Response
 	{
 		TransmitionStatus	transmission_status;
-		std::string			message;
+		Data				data;
 	};
 
 }	// namespace TCPClientServer

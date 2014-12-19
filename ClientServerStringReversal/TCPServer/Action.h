@@ -3,11 +3,13 @@
 
 struct Action
 {
-	std::string operator()(std::string& data) const
+	template<typename Data>
+	void operator()(Data& data) const
 	{
 		using namespace std;
 
-		string temp;
+		Data temp;
+		temp.resize(data.size());
 
 		copy(data.rbegin(), data.rend(), temp.begin());
 		copy(temp.begin(), temp.end(), data.begin());

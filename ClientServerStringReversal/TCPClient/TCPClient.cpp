@@ -11,9 +11,15 @@ int main(int argc, char* argv[])
 
 	try
 	{
+		if (argc != 3)
+		{
+			cerr << "Usage: " << argv[0] << " <host> <port>" << endl;
+			exit(EXIT_FAILURE);
+		}
+
 		boost::asio::io_service io_service;
 
-		TCPConnector<Data> conn(io_service, "localhost", "12345");
+		TCPConnector<Data, Data> conn(io_service, argv[1], argv[2]);
 
 		if (!conn.open())
 		{
@@ -22,13 +28,13 @@ int main(int argc, char* argv[])
 		}
 
 		Data d;
-		d.message = "Testing...";
+		d = "Testing...";
 
 		cout << "Sending message to server..." << endl;
 
 		auto response = conn.send(d);
 
-		cout << "Received response from server: " << response.message << endl;
+		cout << "Received response from server: " << response.data << endl;
 	}
 	catch (exception& e)
 	{

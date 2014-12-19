@@ -7,13 +7,14 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
-#include <ClientServerFramework/Server/Response.h>
+#include <ClientServerFramework/Server/Response.hpp>
 
 namespace ClientServer
 {
-	template<typename InternetProtocol, typename Data>
+	template<typename InternetProtocol, typename ClientData, typename ServerData>
 	class Connector
 	{
+		typedef typename Response<ServerData> response_type;
 	public:
 		Connector(
 			boost::asio::io_service& io_service, std::string const& host, std::string const& service) :
@@ -41,37 +42,34 @@ namespace ClientServer
 			return point != endpoint_iterator_type();
 		}
 
-		Response send(Data const& data)
+		response_type send(ClientData const& data)
 		{
 			using namespace boost::asio;
 
 			boost::system::error_code ec;
 
 			// for initial testing just send a string message
-			write(socket_, buffer(data.message), ec);
+			write(socket_, buffer(data), ec);
 			handle_error(ec);
 
-			Response result;
+			response_type result;
 
 			// for initial testing just read a string message, of maximum length 20
-			static size_t const max_read_size = 20;
 			std::array<char, max_read_size> a;
-			read(socket_, buffer(a), ec);
+			//read(socket_, buffer(a), ec);
+			socket_.read_some(buffer(a), ec);
 			handle_error(ec);
 
-			std::copy(a.begin(), a.end(), result.message.begin()); 
+			// copy a to result
+			result.data.resize(a.size());
+			std::copy(a.begin(), a.end(), result.data.begin()); 
 			result.transmission_status = OK;
 
 			return result;
 		}
 	private:
-		typedef typename InternetProtocol::resolver resolver_type;
-		resolver_type resolver_;
-		typedef typename resolver_type::query query_type;
-		query_type query_;
-		typedef typename resolver_type::iterator endpoint_iterator_type;
-		typedef typename InternetProtocol::socket socket_type;
-		socket_type socket_;
+		/// Hard-coded max read size.
+		static size_t const max_read_size = 80;
 
 		// Handles any errors, if any, encountered during a socket operation.
 		void handle_error(boost::system::error_code const& ec)
@@ -81,5 +79,13 @@ namespace ClientServer
 				throw boost::system::system_error(ec);
 			}
 		}
+
+		typedef typename InternetProtocol::resolver resolver_type;
+		resolver_type resolver_;
+		typedef typename resolver_type::query query_type;
+		query_type query_;
+		typedef typename resolver_type::iterator endpoint_iterator_type;
+		typedef typename InternetProtocol::socket socket_type;
+		socket_type socket_;
 	};
 }
