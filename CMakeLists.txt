@@ -1,8 +1,5 @@
 cmake_minimum_required (VERSION 3.0)
 
-# Maps to Visual Studio solution file (Tutorial.sln)
-# The solution will have all targets (exe, lib, dll) 
-# as Visual Studio projects (.vcproj)
 project(TCPClientServer)
 
 # Turn on the ability to create folders to organize projects (.vcproj)
@@ -18,7 +15,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Useful for displaying errors, warnings, and debugging
 #message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
-# For some reason, CMake fails when the specific libraries are required.
+# For some reason, CMake fails when the specific Boost libraries are required.
 # We use link_directories as a work around (see below).
 find_package(Boost 1.57 REQUIRED)
 if(NOT ${Boost_FOUND})
@@ -49,5 +46,4 @@ add_definitions(-D_WIN32_WINNT=${ver})
 
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(ClientServerFramework)
-#add_subdirectory(ClientServerCalculator)
-add_subdirectory(ClientServerStringReversal)
+add_subdirectory(ClientServerCalculator)

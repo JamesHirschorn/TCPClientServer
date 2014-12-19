@@ -1,7 +1,8 @@
+file(GLOB SOURCES "*.h" "*.hpp" "*.cpp")
 
-source_group("Source Files" FILES ../Shared/Data.h)
+source_group("Source Files" FILES ${SOURCES} ../Shared/Data.h)
 
-add_executable(TCPClient TCPClient.cpp ../Shared/Data.h)
+add_executable(TCPClient ${SOURCES} ../Shared/Data.h)
 
 #target_link_libraries(TCPClient ${Boost_LIBRARIES})
 
