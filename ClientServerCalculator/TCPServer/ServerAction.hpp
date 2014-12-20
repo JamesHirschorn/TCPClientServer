@@ -1,19 +1,17 @@
-/** This is the strategy for the multiplication calculator. */
+/** This is the strategy for the multiplication calculator server. */
 
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <sstream>
 
-#include <ClientServerStringReversal/Shared/data.h>
-
 /// ServerData must be std::string or something highly compatible with it.
-template<typename ServerData>
-struct Action
+template<typename ClientData, typename ServerData>
+struct ServerAction
 {
 	typedef ServerData result_type;	// this meets the official standards for a function object
 
-	result_type operator()(data const& d) const
+	result_type operator()(ClientData const& d) const
 	{
 		double x = d.real * d.integer;
 

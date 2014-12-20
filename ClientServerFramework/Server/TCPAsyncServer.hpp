@@ -10,13 +10,13 @@
 
 namespace ClientServer {
 
-	template<typename SessionType>
+	template<typename SessionType, typename Strategy>
 	class TCPAsyncServer :
-		public AsyncServer<boost::asio::ip::tcp, SessionType>
+		public AsyncServer<boost::asio::ip::tcp, SessionType, Strategy>
 	{
 	public:
-		TCPAsyncServer(boost::asio::io_service& io_service, short port) :
-			AsyncServer(io_service, port)
+		TCPAsyncServer(boost::asio::io_service& io_service, short port, Strategy const& strategy) :
+			AsyncServer(io_service, port, strategy)
 		{
 		}
 	};

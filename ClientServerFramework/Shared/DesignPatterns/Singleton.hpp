@@ -1,5 +1,8 @@
 /* A simple thread-safe generic indestructible Singleton. */
 
+#ifndef CLIENT_SERVER_SHARED_DESIGNPATTERNS_SINGLETON_HPP
+#define CLIENT_SERVER_SHARED_DESIGNPATTERNS_SINGLETON_HPP
+
 namespace patterns {
 
 	template<typename T>
@@ -7,7 +10,7 @@ namespace patterns {
 	{
 	public:
 		// returns a reference to the single instance of type T
-		T& get_instance()
+		static T& get_instance()
 		{
 			// This is thread-safe in C++11.
 			static T instance;
@@ -19,3 +22,5 @@ namespace patterns {
 	};
 
 }	// namespace patterns
+
+#endif	// !CLIENT_SERVER_SHARED_DESIGNPATTERNS_SINGLETON_HPP

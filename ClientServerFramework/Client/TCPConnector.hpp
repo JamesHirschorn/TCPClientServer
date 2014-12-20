@@ -1,3 +1,8 @@
+/**
+*	Specialization the Connector class for the TCP internet protocol.
+*	See Connector.hpp for documentation.
+*/
+
 #include <string>
 #include <utility>
 

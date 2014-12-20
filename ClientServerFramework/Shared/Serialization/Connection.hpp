@@ -89,9 +89,10 @@ namespace ClientServer {
 			boost::asio::async_write(socket_, buffers, handler);
 		}
 
-		/// Synchronized write.
+		/// Synchronized write. 
+		/// Return value indicates the number of bytes written.
 		template<typename T>
-		void write(T const& t, boost::system::error_code& ec)
+		std::size_t write(T const& t, boost::system::error_code& ec)
 		{
 			// Serialize the data first so we know how large it is.
 			std::ostringstream archive_stream;
@@ -108,7 +109,7 @@ namespace ClientServer {
 				// Something went wrong, inform the caller.
 				ec = boost::asio::error::invalid_argument;
 				//socket_.get_io_service().post(boost::bind(handler, error));
-				return;
+				return header_stream.str().size();
 			}
 			outbound_header_ = header_stream.str();
 
@@ -119,7 +120,7 @@ namespace ClientServer {
 			buffers.push_back(boost::asio::buffer(outbound_data_));
 
 			//boost::asio::write(socket_, buffers, ec);
-			boost::asio::write(socket_, buffers, boost::asio::transfer_all(), ec);
+			return boost::asio::write(socket_, buffers, boost::asio::transfer_all(), ec);
 		}
 
 		/// Asynchronously read a data structure from the socket.

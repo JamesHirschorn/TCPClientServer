@@ -23,24 +23,7 @@ source_group("${BASE_DIR}\\Shared\\DesignPatterns" FILES ${SHARED_DESIGNPATTERNS
 source_group("${BASE_DIR}\\Shared\\Container" FILES ${SHARED_CONTAINER_SOURCES})
 source_group("${BASE_DIR}\\Shared\\Serialization" FILES ${SHARED_SERIALIZATION_SOURCES})
 
-# Properties->C/C++->General->Additional Include Directories
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-# Set Properties->General->Configuration Type to Dynamic Library(.dll)
-# Creates math.dll with the listed sources collected in the variables
-# Also adds sources to the Solution Explorer
-#add_library(math SHARED ${MATH_SOURCES} 
-#                        ${SIMPLE_FUNCTION_SOURCES} 
-#                        ${ADVANCED_FUNCTION_SOURCES})
-#add_library(ClientServerFramework INTERFACE)
-#target_include_directories(ClientServerFramework INTERFACE
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-
 add_library(ClientServerFramework ${ALL_SOURCES})
-
-# Creates folder "libraries" and adds target project (math.vcproj)
-#set_property(TARGET math PROPERTY FOLDER "libraries")
-#set_property(TARGET ClientServerFramework)
 
 # Adds logic to INSTALL.vcproj to copy math.dll to destination directory
 #install (TARGETS math

@@ -8,14 +8,12 @@ namespace safe_container {
 	template <typename T, typename Container = std::deque<T>>
 	class queue
 	{
-		// To simplify use cases:
-		static_assert(std::is_nothrow_copy_constructible<T>::value, "whoops - not desired");
-
 		mutable std::mutex _lock;
-		std::queue<T, Container> queue_impl_;
+		typedef std::queue<T, Container> queue_type;
+		queue_type queue_impl_;
 	public:
-		typedef queue_impl_::reference reference;
-		typedef queue_impl_::const_reference const_reference;
+		typedef typename queue_type::reference reference;
+		typedef typename queue_type::const_reference const_reference;
 
 		reference back()
 		{
@@ -36,6 +34,11 @@ namespace safe_container {
 		{
 			std::lock_guard<std::mutex> lk(_lock);
 			return queue_impl_.front();
+		}
+		bool empty() const
+		{
+			std::lock_guard<std::mutex> lk(_lock);
+			return queue_impl_.empty();
 		}
 		void pop()
 		{

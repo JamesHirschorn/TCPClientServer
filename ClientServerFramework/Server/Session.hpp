@@ -39,11 +39,12 @@ namespace ClientServer {
 		typedef typename InternetProtocol::socket socket_type;
 	public:
 		typedef std::shared_ptr<Session> pointer_type;
+		typedef Strategy strategy_type;
 
 		/// factory method (only way to creat new Session`s).
-		static pointer_type create(boost::asio::io_service& io_service)
+		static pointer_type create(boost::asio::io_service& io_service, strategy_type const& strategy)
 		{
-			return pointer_type(new Session(io_service));
+			return pointer_type(new Session(io_service, strategy));
 		}
 
 		void start()
@@ -61,8 +62,9 @@ namespace ClientServer {
 		}
 	protected:
 		// ctor
-		Session(boost::asio::io_service& io_service) : 
-			connection_(io_service)
+		Session(boost::asio::io_service& io_service, strategy_type const& strategy) : 
+			connection_(io_service),
+			strategy_(strategy)
 		{
 			session_id_ = count++;
 			std::clog << "Creating session " << session_id_ << std::endl;
@@ -119,7 +121,7 @@ namespace ClientServer {
 		}
 
 		Connection<InternetProtocol> connection_;
-		Strategy strategy_;			// The default constructed functor is used.
+		Strategy strategy_;			
 		ClientData cdata_;
 		Response<ServerData> response_;
 		std::size_t session_id_;

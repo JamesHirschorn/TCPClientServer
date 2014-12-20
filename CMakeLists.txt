@@ -44,6 +44,9 @@ endmacro()
 get_WIN32_WINNT(ver)
 add_definitions(-D_WIN32_WINNT=${ver})
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+set(INSTALL_SUBDIR "EXE")
+
 # Sub-directories where more CMakeLists.txt exist
 add_subdirectory(ClientServerFramework)
 add_subdirectory(ClientServerCalculator)

@@ -1,6 +1,6 @@
 #include <exception>
 
-#include <ClientServerStringReversal/TCPClient/DataScraper.h>
+#include <ClientServerCalculator/TCPClient/DataScraper.h>
 
 DataScraper::DataScraper(std::istream& is)
 	: Scraper(is)
@@ -8,7 +8,7 @@ DataScraper::DataScraper(std::istream& is)
 }
 
 /// Define the abstract data getter.
-data ClientServer::Scraper<data>::get_datum()
+data DataScraper::get_datum() const
 {
 	using namespace std;
 
@@ -16,14 +16,15 @@ data ClientServer::Scraper<data>::get_datum()
 
 	try
 	{
-		d.request << is_;
-		d.id << is_;
-		d.integer << is_;
-		d.real << is_;
+		input_stream() >> d.request;
+		input_stream() >> d.id;
+		input_stream() >> d.integer;
+		input_stream() >> d.real;
 	}
 	catch (std::exception& e)
 	{
 		/// Note: Should be checking what exception e is (in a rush).
+		std::cerr << e.what() << std::endl;
 		throw bad_data_exception();
 	}
 
