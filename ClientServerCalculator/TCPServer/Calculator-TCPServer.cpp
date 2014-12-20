@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
 	using namespace std;
 	using boost::asio::ip::tcp;
-	using namespace ClientServer;
+	using namespace Server;
 
 	try
 	{

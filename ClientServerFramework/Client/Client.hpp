@@ -19,6 +19,9 @@
  *	6. Any error handling of client communications is done here.
  */
 
+#ifndef FRAMEWORK_CLIENT_CLIENT_HPP
+#define FRAMEWORK_CLIENT_CLIENT_HPP
+
 #include <iostream>
 #include <istream>
 #include <stdexcept>
@@ -31,7 +34,7 @@
 #include <ClientServerFramework/Server/Response.hpp>
 #include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
 
-namespace ClientServer {
+namespace Client {
 
 	template<typename Connector, typename Scraper, typename Strategy>
 	class Client
@@ -126,7 +129,7 @@ namespace ClientServer {
 						ok = true;
 
 						// also check the status
-						ok &= response.transmission_status == OK;
+						ok &= response.transmission_status == Server::OK;
 
 						// If everything is OK then pop the data from the queue.
 						if (ok)
@@ -154,4 +157,6 @@ namespace ClientServer {
 		Strategy strategy_;
 	};
 
-}	// namespace ClientServer
+}	// namespace Client
+
+#endif	// !FRAMEWORK_CLIENT_CLIENT_HPP

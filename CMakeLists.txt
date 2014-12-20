@@ -44,9 +44,10 @@ endmacro()
 get_WIN32_WINNT(ver)
 add_definitions(-D_WIN32_WINNT=${ver})
 
+# Executables will be installed in the bin subdirectory of the root directory.
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
-set(INSTALL_SUBDIR "EXE")
+set(INSTALL_SUBDIR "bin")
 
-# Sub-directories where more CMakeLists.txt exist
+# Sub-directories
 add_subdirectory(ClientServerFramework)
 add_subdirectory(ClientServerCalculator)

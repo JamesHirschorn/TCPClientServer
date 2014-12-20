@@ -7,7 +7,7 @@
 
 #include <ClientServerFramework/Server/Session.hpp>
 
-namespace ClientServer {
+namespace Server {
 
 	template<typename Strategy, typename ClientData, typename ServerData>
 	class TCPSession :
@@ -18,4 +18,4 @@ namespace ClientServer {
 			Session(socket) {}
 	};
 
-}
+}	// namespace Server

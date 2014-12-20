@@ -7,6 +7,9 @@
  *	   Server, and then receives a response of type Response from the Server.
  */
 
+#ifndef FRAMEWORK_CLIENT_CONNECTOR_HPP
+#define FRAMEWORK_CLIENT_CONNECTOR_HPP
+
 #include <string>
 
 #include <boost/asio/buffer.hpp>
@@ -18,7 +21,7 @@
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 #include <ClientServerFramework/Server/Response.hpp>
 
-namespace ClientServer
+namespace Client
 {
 	template<
 		typename InternetProtocol, 
@@ -107,7 +110,7 @@ namespace ClientServer
 		}
 
 		/// The (serialized) connection to the server.
-		Connection<InternetProtocol> connection_;
+		io::Connection<InternetProtocol> connection_;
 
 		typedef typename InternetProtocol::resolver resolver_type;
 		resolver_type resolver_;
@@ -115,4 +118,6 @@ namespace ClientServer
 		query_type query_;
 		typedef typename resolver_type::iterator endpoint_iterator_type;
 	};
-}
+}	// namespace Client
+
+#endif	// !FRAMEWORK_CLIENT_CONNECTOR_HPP

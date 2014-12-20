@@ -11,7 +11,7 @@
 #include <ClientServerCalculator/Shared/Data.h>
 
 class DataScraper :
-	public ClientServer::Scraper<data>
+	public Client::Scraper<data>
 {
 public:
 	DataScraper(std::istream& is); 

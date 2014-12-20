@@ -1,11 +1,11 @@
 /* Struct for server responses. */
 
-#ifndef CLIENT_SERVER_RESPONSE_H
-#define CLIENT_SERVER_RESPONSE_H
+#ifndef FRAMEWORK_SERVER_RESPONSE_HPP
+#define FRAMEWORK_SERVER_RESPONSE_HPP
 
 #include <string>
 
-namespace ClientServer {
+namespace Server {
 
 	enum TransmitionStatus {OK, BAD};
 
@@ -25,6 +25,6 @@ namespace ClientServer {
 		}
 	};
 
-}	// namespace TCPClientServer
+}	// namespace Server
 
-#endif	// !CLIENT_SERVER_RESPONSE_H
+#endif	// !FRAMEWORK_SERVER_RESPONSE_H

@@ -10,7 +10,7 @@
 
 #include <ClientServerFramework/Client/Connector.hpp>
 
-namespace ClientServer {
+namespace Client {
 
 	template<typename ClientData, typename Response>
 	class TCPConnector : 
@@ -22,4 +22,4 @@ namespace ClientServer {
 		{
 		}
 	};
-}
+}	// namespace Client

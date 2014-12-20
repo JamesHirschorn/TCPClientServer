@@ -8,7 +8,7 @@
 #include <ClientServerFramework/Client/Client.hpp>
 #include <ClientServerFramework/Client/TCPConnector.hpp>
 
-namespace ClientServer {
+namespace Client {
 
 	template<typename ClientData, typename Response, typename Scraper, typename Strategy>
 	class TCPClient :
@@ -16,4 +16,4 @@ namespace ClientServer {
 	{
 	};
 
-}	// namespace ClientServer
+}	// namespace Client

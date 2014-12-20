@@ -8,8 +8,8 @@
  *  encapsulated in this object.
  */
 
-#ifndef CLIENT_SERVER_SESSION_HPP
-#define CLIENT_SERVER_SESSION_HPP
+#ifndef FRAMEWORK_SERVER_SESSION_HPP
+#define FRAMEWORK_SERVER_SESSION_HPP
 
 #include <memory>
 
@@ -20,7 +20,7 @@
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 #include <ClientServerFramework/Server/Response.hpp>
 
-namespace ClientServer {
+namespace Server {
 
 	/// The Strategy Pattern is used here, as a functor given by a template parameter.
 	/// It determines what action the server performs on the data sent from the client.
@@ -120,7 +120,7 @@ namespace ClientServer {
 			});
 		}
 
-		Connection<InternetProtocol> connection_;
+		io::Connection<InternetProtocol> connection_;
 		Strategy strategy_;			
 		ClientData cdata_;
 		Response<ServerData> response_;
@@ -129,6 +129,6 @@ namespace ClientServer {
 
 	template<typename InternetProtocol, typename Strategy, typename ClientData, typename ServerData>
 	std::size_t Session<InternetProtocol, Strategy, ClientData, ServerData>::count = 0;
-}
+}	// namespace Server
 
-#endif	// !CLIENT_SERVER_SESSION_HPP
+#endif	// !FRAMEWORK_SERVER_SESSION_HPP

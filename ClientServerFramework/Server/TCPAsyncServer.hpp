@@ -8,7 +8,7 @@
 
 #include <ClientServerFramework/Server/AsyncServer.hpp>
 
-namespace ClientServer {
+namespace Server {
 
 	template<typename SessionType, typename Strategy>
 	class TCPAsyncServer :
@@ -21,4 +21,4 @@ namespace ClientServer {
 		}
 	};
 
-}
+}	// namespace Server

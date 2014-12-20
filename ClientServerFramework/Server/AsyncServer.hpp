@@ -4,6 +4,9 @@
  *	Every time a client connects, a new session of type SessionType is started.
  */
 
+#ifndef FRAMEWORK_SERVER_ASYNCSERVER_HPP
+#define FRAMEWORK_SERVER_ASYNCSERVER_HPP
+
 #include <memory>
 #include <utility>
 
@@ -11,7 +14,7 @@
 
 #include <ClientServerFramework/Server/Session.hpp>
 
-namespace ClientServer {
+namespace Server {
 
 	template<typename InternetProtocol, typename SessionType, typename Strategy>
 	class AsyncServer
@@ -59,4 +62,6 @@ namespace ClientServer {
 		strategy_type strategy_;
 	};
 
-}
+}	// namespace Server
+
+#endif	// !FRAMEWORK_SERVER_ASYNCSERVER_HPP

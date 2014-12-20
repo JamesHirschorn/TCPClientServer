@@ -2,6 +2,9 @@
  * Abstract base class for scraping data from the input.
  */
 
+#ifndef FRAMEWORK_CLIENT_SCRAPER_HPP
+#define FRAMEWORK_CLIENT_SCRAPER_HPP
+
 #include <exception>
 #include <iostream>
 #include <istream>
@@ -9,7 +12,7 @@
 #include <ClientServerFramework/Shared/Container/SafeQueue.hpp>
 #include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
 
-namespace ClientServer
+namespace Client
 {
 	/// Scrapes and confirms the input, and then pushes it 
 	/// on the Singeton instance of the Queue.
@@ -102,5 +105,6 @@ namespace ClientServer
 		queue_type& queue_;
 	};
 
-}
+}	// namespace Client
 
+#endif	// !FRAMEWORK_CLIENT_SCRAPER_HPP

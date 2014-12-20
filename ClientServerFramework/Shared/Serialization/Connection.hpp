@@ -16,8 +16,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef SERIALIZATION_CONNECTION_HPP
-#define SERIALIZATION_CONNECTION_HPP
+#ifndef FRAMEWORK_SERIALIZATION_CONNECTION_HPP
+#define FRAMEWORK_SERIALIZATION_CONNECTION_HPP
 
 #include <boost/asio.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -30,7 +30,7 @@
 #include <sstream>
 #include <vector>
 
-namespace ClientServer {
+namespace io {
 
 	/// The connection class provides serialization primitives on top of a socket.
 	/**
@@ -254,6 +254,6 @@ namespace ClientServer {
 		std::vector<char> inbound_data_;
 	};
 
-}	// namespace ClientServer
+}	// namespace io
 
-#endif // SERIALIZATION_CONNECTION_HPP
+#endif // !FRAMEWORK_SERIALIZATION_CONNECTION_HPP

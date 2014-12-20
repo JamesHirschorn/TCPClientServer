@@ -9,7 +9,7 @@
 int main(int argc, char* argv[])
 {
 	using namespace std;
-	using namespace ClientServer;
+	using namespace Client;
 
 	/** This TCP client program is essentially just an instantiation of the 
 		generic TCPClient class. Hence it is just a matter of plugging in the
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	*/
 
 	typedef data									data_type;
-	typedef Response<string>						response_type;
+	typedef Server::Response<string>				response_type;
 	typedef DataScraper								scraper_type;
 	typedef ClientActions<data_type, response_type>	strategy_type;
 
