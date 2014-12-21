@@ -17,4 +17,8 @@ public:
 	DataScraper(std::istream& is); 
 private:
 	data get_datum() const;
+
+	/// helper for get_datum
+	template<typename T>
+	void get_item(std::istream& is, T& item) const;
 };

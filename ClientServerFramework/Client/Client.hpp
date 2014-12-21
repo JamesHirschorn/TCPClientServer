@@ -148,7 +148,7 @@ namespace Client {
 			} while (ok && scraper_);
 
 			// With the current simple error-handling: 
-			// We alwasys retry connecting, so long as the sraper is in good status.
+			// We always retry connecting, so long as the scraper is in good status.
 			return scraper_;
 		}
 

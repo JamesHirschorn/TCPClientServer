@@ -41,7 +41,7 @@ namespace Client
 		{}
 
 		/// Non-copy constructible.
-		Connector(Connector const& other) = delete;
+		//Connector(Connector const& other) = delete;
 
 		/// opens a connection to the server
 		bool open()

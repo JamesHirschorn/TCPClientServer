@@ -8,6 +8,8 @@
 #include <exception>
 #include <iostream>
 #include <istream>
+#include <limits>
+#include <stdexcept>
 
 #include <ClientServerFramework/Shared/Container/SafeQueue.hpp>
 #include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
@@ -29,7 +31,7 @@ namespace Client
 			is_(is), 
 			queue_(patterns::Singleton<queue_type>::get_instance())
 		{
-			std::clog << "Data scraper started." << std::endl;
+			//std::clog << "Data scraper started." << std::endl;
 		}
 
 		/// input stream inspector
@@ -56,13 +58,72 @@ namespace Client
 				}
 				catch (bad_data_exception)
 				{
-					// Ignore this bad data item and continue scraping.
+					if (input_stream().bad())
+						throw std::runtime_error("Input stream corrupted.");
+
+					if (input_stream().fail())
+					{
+						try
+						{
+							// Ignore this bad data item and continue scraping.
+							//input_stream().clear();
+							std::cin.clear();
+							// skip bad input
+							//input_stream().
+								std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+								if (std::cin.eof() || std::cin.bad())
+								{
+									int x = 0;
+								}
+								bool good = std::clog.good();
+							std::clog << "Bad data read from input." << std::endl;
+							continue;
+						}
+						catch (...)
+						{
+							std::cerr << "WTF??" << std::endl;
+							//std::cerr << e.what() << std::endl;
+						}
+					}
+
+					// Could be EOF.
 					continue;
 				}
 				catch (std::exception& e)
 				{
 					std::cerr << "Error in scraping input data: " << e.what() << std::endl;
 					break;
+				}
+				catch (...)
+				{
+					std::cerr << "WTF??" << std::endl;
+				}
+				if (input_stream().bad())
+					throw std::runtime_error("Input stream corrupted.");
+
+				if (input_stream().fail())
+				{
+					try
+					{
+						// Ignore this bad data item and continue scraping.
+						//input_stream().clear();
+						std::cin.clear();
+						// skip bad input
+						//input_stream().
+						std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+						if (std::cin.eof() || std::cin.bad())
+						{
+							int x = 0;
+						}
+						bool good = std::clog.good();
+						//std::clog << "Bad data read from input." << std::endl;
+						//continue;
+					}
+					catch (...)
+					{
+						std::cerr << "WTF??" << std::endl;
+						//std::cerr << e.what() << std::endl;
+					}
 				}
 			}
 		}
@@ -71,6 +132,7 @@ namespace Client
 		void operator()() const
 		{
 			start();
+			std::clog << "Exitting scraping thread." << std::endl;
 		}
 
 		/// whether the scraper is in a good state
