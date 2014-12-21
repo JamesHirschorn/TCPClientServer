@@ -41,7 +41,7 @@ namespace Server {
 		typedef std::shared_ptr<Session> pointer_type;
 		typedef Strategy strategy_type;
 
-		/// factory method (only way to creat new Session`s).
+		/// factory method (only way to create new Session[s]).
 		static pointer_type create(boost::asio::io_service& io_service, strategy_type const& strategy)
 		{
 			return pointer_type(new Session(io_service, strategy));
@@ -93,6 +93,8 @@ namespace Server {
 				std::clog << "Session " << session_id_ << " attempting to receive from client." << std::endl;
 				if (!ec)
 				{
+					std::clog << "Session " << session_id_ << ": " << length << " bytes recived." << std::endl;
+
 					// perform the strategy on the received data
 					response_.data = strategy_(cdata_);
 					response_.transmission_status = OK;
@@ -114,6 +116,8 @@ namespace Server {
 			{
 				if (!ec)
 				{
+					std::clog << "Session " << session_id_ << ": " << length << " bytes sent." << std::endl;
+
 					// Go back into a receiving state.
 					do_receive();
 				}

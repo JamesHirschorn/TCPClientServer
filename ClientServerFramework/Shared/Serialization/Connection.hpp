@@ -134,9 +134,7 @@ namespace io {
 			});
 		}
 
-		/// Handle a completed read of a message header. The handler is passed using
-		/// a tuple since boost::bind seems to have trouble binding a function object
-		/// created using boost::bind as a parameter.
+		/// Handle a completed read of a message header. 
 		template <typename T, typename Handler>
 		void handle_read_header(const boost::system::error_code& e, std::size_t len,
 			T& t, Handler const& handler)
@@ -195,15 +193,20 @@ namespace io {
 				handler(ec, len);
 			}
 		}
+		
 		/// Synchronously read the data from the socket.
+		/// Return value indicates the number of bytes read.
 		template<typename T>
-		void read(T& t, boost::system::error_code& ec)
+		std::size_t read(T& t, boost::system::error_code& ec)
 		{
 			using namespace boost::asio;
 
-			boost::asio::read(socket_, buffer(inbound_header_), ec);
+			std::size_t length;
 
-			if (ec) return;	// an error occurred.
+			length = boost::asio::read(socket_, buffer(inbound_header_), ec);
+
+			if (ec) 
+				return length;	// an error occurred.
 
 			// Determine the length of the serialized data.
 			std::string s(inbound_header_, header_length);
@@ -213,11 +216,11 @@ namespace io {
 			{
 				// Header doesn't seem to be valid. Inform the caller.
 				ec = boost::asio::error::invalid_argument;
-				return;
+				return 0;
 			}
 
 			inbound_data_.resize(inbound_data_size);
-			boost::asio::read(socket_, buffer(inbound_data_), ec);
+			length = boost::asio::read(socket_, buffer(inbound_data_), ec);
 
 			// Extract the data structure from the data just received.
 			try
@@ -233,6 +236,8 @@ namespace io {
 				ec = boost::system::error_code(boost::asio::error::invalid_argument);
 				throw e;
 			}
+
+			return length;
 		}
 	private:
 		/// The underlying socket.

@@ -57,11 +57,11 @@ namespace Client {
 
 			// The following code will not compile in VS2013:
 			//std::thread t(&Scraper::start, scraper_);
-			// Thus we use Scaper as a FunctionObject instead (i.e. we don't call start()).
+			// Thus we use Scraper as a FunctionObject instead (i.e. we don't call start()).
 			std::thread t(std::ref(scraper_));
 			t.detach();
 
-			// whether to try re-openning the server connection
+			// whether to try re-opening the server connection
 			bool retry;
 
 			do
@@ -114,10 +114,11 @@ namespace Client {
 
 					// Send the data to the server.
 					boost::system::error_code ec;
-					std::size_t length;	// # of bytes sent
-					auto response = connector_.send(data, ec, length);
+					std::size_t sent_length, received_length;	// # of bytes sent/received
+					auto response = connector_.send(data, ec, sent_length, received_length);
 
-					std::clog << length << " bytes sent." << std::endl;
+					std::clog << sent_length << " bytes sent." << std::endl;
+					std::clog << received_length << " bytes received." << std::endl;
 
 					// Perform the response part of the strategy.
 					strategy_.response(response);

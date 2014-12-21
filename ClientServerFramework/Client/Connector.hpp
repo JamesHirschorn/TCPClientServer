@@ -41,7 +41,7 @@ namespace Client
 		{}
 
 		/// Non-copy constructible.
-		//Connector(Connector const& other) = delete;
+		Connector(Connector const& other) = delete;
 
 		/// opens a connection to the server
 		bool open()
@@ -63,7 +63,7 @@ namespace Client
 			return point != endpoint_iterator_type();
 		}
 
-		/// opens a connection to the server ansynchronously
+		/// opens a connection to the server asynchronously
 		template<typename Handler>
 		void async_open(Handler const& handler)
 		{
@@ -83,17 +83,21 @@ namespace Client
 		/// Sends one time of data to the server
 		/// and then returns the server response.
 		/// ec contains the error code of the send operation.
+		/// sent_length is the numbrer of bytes sent.
+		/// received_length is the number of bytes received in response.
 		/// The return value is undefined in the case of an error.
-		response_type send(ClientData const& data, boost::system::error_code& ec, std::size_t& length)
+		response_type send(ClientData const& data, 
+			boost::system::error_code& ec, 
+			std::size_t& sent_length, std::size_t& received_length)
 		{
 			// connection_ will automatically decode data 
 			// that is read/writes from/to the underlying socket.
-			length = connection_.write(data, ec);
+			sent_length = connection_.write(data, ec);
 
 			response_type result;
 			if (!ec)
 			{
-				connection_.read(result, ec);
+				received_length = connection_.read(result, ec);
 			}
 
 			return result;
