@@ -80,7 +80,6 @@ namespace Client
 		void operator()() const
 		{
 			start();
-			std::clog << "Exitting scraping thread." << std::endl;
 		}
 
 		/// whether the scraper is in a good state
