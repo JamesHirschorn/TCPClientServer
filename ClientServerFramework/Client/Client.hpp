@@ -42,12 +42,13 @@ namespace Client {
 	public:
 		/// factory method (for convenience)
 		static Client* create(
-			boost::asio::io_service& io_service,
+			boost::asio::io_service& io_service, 
+			std::string const& client_id,
 			std::string const& host, std::string const& service,
-			std::istream& is,
+			std::istream& is, 
 			Strategy const& strategy)
 		{
-			return new Client(io_service, host, service, is, strategy);
+			return new Client(io_service, client_id, host, service, is, strategy);
 		}
 
 		/// starts the client
@@ -56,8 +57,9 @@ namespace Client {
 			// Start the scraper.
 
 			// The following code will not compile in VS2013:
-			//std::thread t(&Scraper::start, scraper_);
-			// Thus we use Scraper as a FunctionObject instead (i.e. we don't call start()).
+			//std::thread t(&Scraper::start, std::ref(scraper_));
+			// Thus we use Scraper as a FunctionObject instead 
+			// (i.e. we don't call start directly).
 			std::thread t(std::ref(scraper_));
 			t.detach();
 
@@ -82,11 +84,12 @@ namespace Client {
 		/// ctor
 		Client(
 			boost::asio::io_service& io_service,
+			std::string const& client_id,
 			std::string const& host, std::string const& service,
 			std::istream& is,
 			Strategy const& strategy) :
 			connector_(io_service, host, service),
-			scraper_(is),
+			scraper_(is, client_id),
 			strategy_(strategy)
 		{}
 

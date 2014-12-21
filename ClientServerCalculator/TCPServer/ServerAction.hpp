@@ -5,7 +5,9 @@
 #include <string>
 #include <sstream>
 
-/// ServerData must be std::string or something highly compatible with it.
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+/// ServerData must be server_data or something fully compatible with it.
 template<typename ClientData, typename ServerData>
 struct ServerAction
 {
@@ -13,15 +15,39 @@ struct ServerAction
 
 	result_type operator()(ClientData const& d) const
 	{
-		double x = d.real * d.integer;
+		using namespace boost::posix_time;
+
+		// alias
+		double const& x(d.operand1);
+		double const& y(d.operand2);
+		
+		double answer;
+		
+		switch (d.operation)
+		{
+		case ClientData::ADD:
+			answer = x + y;
+			break;
+		case ClientData::SUBTRACT:
+			answer = x - y;
+			break;
+		case ClientData::MULTIPLY:
+			answer = x * y;
+			break;
+		case ClientData::DIVIDE:
+			answer = x / y;
+			break;
+		default:
+			throw std::logic_error("Invalid operation");
+		}
+
+		ptime timestamp(microsec_clock::local_time());
 
 		result_type result;
 
-		std::ostringstream oss;
-		oss << "Result for request id \"" << d.id << "\" is: " << std::endl
-			<< d.integer << " X " << std::setprecision(15) << d.real 
-			<< " = " << x << '.' << std::endl << std::endl;
-		result = oss.str();
+		result.timestamp = timestamp;
+		result.id = d.id;
+		result.result = answer;
 
 		return result;
 	}

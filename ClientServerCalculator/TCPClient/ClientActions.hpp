@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 
-/// ClientData must be data (see data.h), or a fully compatible type.
+/// ClientData must be client_data (see client_data.h), or a fully compatible type.
 template<typename ClientData, typename Response>
 struct ClientActions
 {
@@ -20,15 +20,11 @@ struct ClientActions
 		{
 			using namespace std;
 
-			cout << "Request Id: " << d.id << message << '.' << endl
-				<< "Request: " << d.request << ", real: " << std::setprecision(15)
-				<< d.real << ", integer: " << d.integer << '.' << endl << endl;
+			cout << "Request Id: " << d.id 
+				<< ". Request: " << std::setprecision(15)
+				<< d.operand1 << ' ' << d.operation << ' ' << d.operand2 << '.' 
+				<< endl << endl;
 		}
-
-		request_type(std::string const& msg) : message(msg)
-		{}
-
-		std::string message;
 	} request;
 
 	struct response_type
@@ -38,12 +34,11 @@ struct ClientActions
 		result_type operator()(Response const& r) const
 		{
 			using namespace std;
-
-			cout << r.data << endl << endl;
+			
+			cout << "Request Id: " << r.data.id << '.' << endl
+				<< "Result: " << std::setprecision(15) 
+				<< r.data.result << ", computed at " << r.data.timestamp << '.'
+				<< endl << endl;
 		}
 	} response;
-
-	ClientActions(std::string const& msg) 
-		: request(msg)
-	{}
 };

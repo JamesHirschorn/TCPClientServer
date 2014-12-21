@@ -136,7 +136,7 @@ namespace io {
 
 		/// Handle a completed read of a message header. 
 		template <typename T, typename Handler>
-		void handle_read_header(const boost::system::error_code& e, std::size_t len,
+		void handle_read_header(boost::system::error_code const& e, std::size_t len,
 			T& t, Handler const& handler)
 		{
 			if (e)
@@ -158,9 +158,9 @@ namespace io {
 				// Start an asynchronous call to receive the data.
 				inbound_data_.resize(inbound_data_size);
 				boost::asio::async_read(socket_, boost::asio::buffer(inbound_data_),
-					[this, &t, handler](boost::system::error_code const& ec, std::size_t len)
+					[this,&t,len,handler](boost::system::error_code const& ec, std::size_t next_len)
 				{
-					handle_read_data(ec, len, t, handler);
+					handle_read_data(ec, len + next_len, t, handler);
 				});
 			}
 		}
@@ -220,7 +220,7 @@ namespace io {
 			}
 
 			inbound_data_.resize(inbound_data_size);
-			length = boost::asio::read(socket_, buffer(inbound_data_), ec);
+			length += boost::asio::read(socket_, buffer(inbound_data_), ec);
 
 			// Extract the data structure from the data just received.
 			try

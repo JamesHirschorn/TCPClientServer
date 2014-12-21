@@ -29,10 +29,10 @@ namespace Server {
 	/// asynchronous communication occurs, and will thus block clients from communicating
 	/// with the server.
 	///
-	/// Note: enabled_shared_from_this is used to ensure that the session remains alive
-	///		  as long as some operation refers to it.
+	/// ClientData must have a std::string client_id field.
 	template<typename InternetProtocol, typename Strategy, typename ClientData, typename ServerData>
 	class Session :
+		// used to ensure that the session remains alive as long as a callback is pending
 		public std::enable_shared_from_this<Session<InternetProtocol, Strategy, ClientData, ServerData>>
 	{
 	protected:
@@ -49,7 +49,7 @@ namespace Server {
 
 		void start()
 		{
-			// Session has does some very basic logging.
+			// Session has doesome very basic logging.
 			std::clog << "Client connection with session id " << session_id_ << "." << std::endl;
 			// Start receiving data from the client.
 			do_receive();
@@ -60,20 +60,19 @@ namespace Server {
 		{
 			return connection_.socket();
 		}
+		/// dtor
+		~Session()
+		{
+			std::clog << "Session " << session_id_ << " closing." << std::endl;
+		}
 	protected:
-		// ctor
+		/// ctor
 		Session(boost::asio::io_service& io_service, strategy_type const& strategy) : 
-			connection_(io_service),
+			connection_(io_service), connected_(false),
 			strategy_(strategy)
 		{
 			session_id_ = count++;
 			std::clog << "Creating session " << session_id_ << std::endl;
-		}
-	public:
-		// dtor
-		~Session()
-		{
-			std::clog << "Session " << session_id_ << " closing." << std::endl;
 		}
 	private:
 		/// session counter
@@ -90,10 +89,16 @@ namespace Server {
 			connection_.async_read(cdata_, 
 				[this,self](boost::system::error_code const& ec, std::size_t length)
 			{
-				std::clog << "Session " << session_id_ << " attempting to receive from client." << std::endl;
 				if (!ec)
 				{
-					std::clog << "Session " << session_id_ << ": " << length << " bytes recived." << std::endl;
+					if (!connected_)
+					{
+						std::clog << "Session " << session_id_ << ": Client ID is " 
+							<< cdata_.client_id << '.' << std::endl;
+						connected_ = true;
+					}
+					std::clog << "Session " << session_id_ << ": " << length << " bytes received." << std::endl;
+
 
 					// perform the strategy on the received data
 					response_.data = strategy_(cdata_);
@@ -125,7 +130,9 @@ namespace Server {
 		}
 
 		io::Connection<InternetProtocol> connection_;
-		Strategy strategy_;			
+		/// whether a connection with the client has been established yet
+		bool connected_;
+		Strategy strategy_;
 		ClientData cdata_;
 		Response<ServerData> response_;
 		std::size_t session_id_;

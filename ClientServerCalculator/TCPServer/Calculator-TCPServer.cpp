@@ -3,7 +3,8 @@
 
 #include <ClientServerFramework/Server/TCPAsyncServer.hpp>
 #include <ClientServerFramework/Server/TCPSession.hpp>
-#include <ClientServerCalculator/Shared/data.h>
+#include <ClientServerCalculator/TCPClient/client_data.hpp>
+#include <ClientServerCalculator/TCPServer/server_data.hpp>
 #include <ClientServerCalculator/TCPServer/ServerAction.hpp>
 
 int main(int argc, char* argv[])
@@ -22,8 +23,8 @@ int main(int argc, char* argv[])
 
 		boost::asio::io_service io_service;
 
-		typedef data											ClientData;
-		typedef std::string										ServerData;
+		typedef client_data										ClientData;
+		typedef server_data										ServerData;
 		typedef ServerAction<ClientData, ServerData>			Strategy;
 		typedef TCPSession<Strategy, ClientData, ServerData>	Session;
 

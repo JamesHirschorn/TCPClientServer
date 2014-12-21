@@ -1,8 +1,8 @@
 file(GLOB SOURCES "*.h" "*.hpp" "*.cpp")
 
-source_group("Source Files" FILES ${SOURCES} ../Shared/Data.h)
+source_group("Source Files" FILES ${SOURCES})
 
-add_executable(Calculator-TCPClient ${SOURCES} ../Shared/Data.h)
+add_executable(Calculator-TCPClient ${SOURCES})
 
 #target_link_libraries(Calculator-TCPClient ${Boost_LIBRARIES})
 

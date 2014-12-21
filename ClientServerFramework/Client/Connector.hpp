@@ -18,6 +18,8 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
+//#include <boost/asio/ssl.hpp>
+
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 #include <ClientServerFramework/Server/Response.hpp>
 

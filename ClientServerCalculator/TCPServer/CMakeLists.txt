@@ -1,7 +1,8 @@
+file(GLOB SOURCES "*.h" "*.hpp" "*.cpp")
 
-source_group("Source Files" FILES ServerAction.hpp)
+source_group("Source Files" FILES ${SOURCES})
 
-add_executable(Calculator-TCPServer Calculator-TCPServer.cpp ServerAction.hpp)
+add_executable(Calculator-TCPServer ${SOURCES})
 
 #target_link_libraries(Calculator-TCPServer ${Boost_LIBRARIES})
 
