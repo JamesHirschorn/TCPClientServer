@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <istream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -44,19 +45,22 @@ namespace Client {
 	class Client
 	{
 	public:
+		typedef std::shared_ptr<Client> pointer_type;
+
 		/// factory method (for convenience)
 		/// keep_alive indicates whether to keep the session alive 
 		/// (from the client end) when the queue is empty and 
 		/// the input stream is in the EOF state. This would be set to true
 		/// for cin, but possibly false for a file stream.
-		static Client* create(
+		static pointer_type create(
 			boost::asio::io_service& io_service, 
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
 			std::istream& is, bool keep_alive,
 			Strategy const& strategy)
 		{
-			return new Client(io_service, client_id, host, service, is, keep_alive, strategy);
+			return pointer_type(
+				new Client(io_service, client_id, host, service, is, keep_alive, strategy));
 		}
 
 		/// starts the client
@@ -76,8 +80,12 @@ namespace Client {
 
 			do
 			{
+				boost::system::error_code ec;
+
 				// Open the connection to the server.
-				if (!connector_.open())
+				bool open = connector_.open(ec);
+				default_error_handler(ec);
+				if (!open)
 				{
 					std::string err_msg = "Unable to open connection.";
 					std::cerr << err_msg << std::endl;
@@ -155,8 +163,8 @@ namespace Client {
 						connection_ok = false;
 						break;
 					default:
-						// we throw for unhandled exceptions
-						throw boost::system::system_error(ec);
+						default_error_handler(ec);
+						break;
 					}
 				}
 
@@ -171,6 +179,15 @@ namespace Client {
 			} while (connection_ok && input_ok);	
 
 			return input_ok;
+		}
+
+		/// For now, it just throws an exception.
+		void default_error_handler(boost::system::error_code const& ec)
+		{
+			if (ec)
+			{
+				throw boost::system::system_error(ec);
+			}
 		}
 
 		Connector connector_;
