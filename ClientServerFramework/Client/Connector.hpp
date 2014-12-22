@@ -61,7 +61,7 @@ namespace Client
 
 			// Attempts to connect to each of the end-points until successful, 
 			// or until all end-points have been tried.
-			auto point = boost::asio::connect(connection_.socket(), endpoints, ec);
+			auto point = connection_.connect(endpoints, ec);
 
 			// If successful, point will reference a valid end-point.
 			return point != endpoint_iterator_type();
@@ -108,7 +108,8 @@ namespace Client
 		}
 	protected:
 		Connector(
-			boost::asio::io_service& io_service, std::string const& host, std::string const& service) :
+			boost::asio::io_service& io_service, 
+			std::string const& host, std::string const& service) :
 			connection_(io_service),
 			resolver_(io_service),
 			query_(host, service)

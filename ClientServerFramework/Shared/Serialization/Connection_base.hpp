@@ -24,7 +24,7 @@
 #ifndef FRAMEWORK_SERIALIZATION_CONNECTION_HPP
 #define FRAMEWORK_SERIALIZATION_CONNECTION_HPP
 
-#include <ClientServerFrameWork/Shared/Connecton_impl.hpp>
+#include <ClientServerFramework/Shared/Serialization/Connection_impl.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -60,7 +60,12 @@ namespace io {
 			return socket_;
 		}*/
 
-
+		/// Connect to the underlying socket.
+		template<typename Iterator>
+		Iterator connect(Iterator begin, boost::system::error_code& ec)
+		{
+			return impl_.connect(begin, ec);
+		}
 
 		/// Asynchronously write a data structure to the socket.
 		template <typename T, typename Handler>
@@ -250,13 +255,10 @@ namespace io {
 		{}
 	protected:
 		/// Constructor.
-		struct connection_implementation;	// forward decl
-		Connection_base(boost::asio::io_service& io_service, connection_implementation& impl)
-			//: socket_(io_service)
+		Connection_base(boost::asio::io_service& io_service, detail::Connection_impl& impl)
 			: impl_(impl)
 		{
 		}
-
 	private:
 		/// The size of a fixed length header.
 		enum { header_length = 8 };
@@ -273,7 +275,7 @@ namespace io {
 		/// Holds the inbound data.
 		std::vector<char> inbound_data_;
 
-		connection_implementation& impl_;
+		detail::Connection_impl& impl_;
 	};
 
 }	// namespace io

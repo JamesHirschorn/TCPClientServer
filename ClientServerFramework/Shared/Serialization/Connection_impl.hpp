@@ -13,21 +13,21 @@ namespace detail {
 	{
 		template<
 			typename Iterator>
-			Iterator connect(
+		Iterator connect(
 			Iterator begin,
 			boost::system::error_code & ec);
 
 		template<
 			typename ConstBufferSequence,
 			typename WriteHandler>
-			void async_write_impl(
+		void async_write_impl(
 			ConstBufferSequence const& buffers,
 			WriteHandler handler);
 
 		template<
 			typename ConstBufferSequence,
 			typename CompletionCondition>
-			std::size_t write_impl(
+		std::size_t write_impl(
 			ConstBufferSequence const& buffers,
 			CompletionCondition completion_condition,
 			boost::system::error_code& ec);
@@ -35,13 +35,13 @@ namespace detail {
 		template<
 			typename MutableBufferSequence,
 			typename ReadHandler>
-			void async_read_impl(
+		void async_read_impl(
 			MutableBufferSequence const& buffers,
 			ReadHandler handler);
 
 		template<
 			typename MutableBufferSequence>
-			std::size_t read_impl(
+		std::size_t read_impl(
 			MutableBufferSequence const& buffers,
 			boost::system::error_code & ec);
 	};

@@ -9,6 +9,9 @@ namespace io {
 	public:
 		typedef Socket socket_type;
 
+		Connection(boost::asio::io_service& io_service) :
+			Connection_base(io_service, impl)
+		{}
 	private:
 		/// The underlying socket.
 		socket_type socket_;
