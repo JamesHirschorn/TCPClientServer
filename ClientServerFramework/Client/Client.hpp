@@ -17,6 +17,10 @@
  *	5. The server response is acted on according to the strategy pattern.
  *
  *	6. Any error handling of client communications is done here.
+ *
+ *	7. In its current form, it is only suitable for synchronous communication
+ *	   with the server; however, it could be easily be modified to also allow 
+ *	   for asynchronous Connector`s as well.
  */
 
 #ifndef FRAMEWORK_CLIENT_CLIENT_HPP
@@ -41,14 +45,18 @@ namespace Client {
 	{
 	public:
 		/// factory method (for convenience)
+		/// keep_alive indicates whether to keep the session alive 
+		/// (from the client end) when the queue is empty and 
+		/// the input stream is in the EOF state. This would be set to true
+		/// for cin, but possibly false for a file stream.
 		static Client* create(
 			boost::asio::io_service& io_service, 
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
-			std::istream& is, 
+			std::istream& is, bool keep_alive,
 			Strategy const& strategy)
 		{
-			return new Client(io_service, client_id, host, service, is, strategy);
+			return new Client(io_service, client_id, host, service, is, keep_alive, strategy);
 		}
 
 		/// starts the client
@@ -86,10 +94,11 @@ namespace Client {
 			boost::asio::io_service& io_service,
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
-			std::istream& is,
+			std::istream& is, bool keep_alive,
 			Strategy const& strategy) :
 			connector_(io_service, host, service),
 			scraper_(is, client_id),
+			keep_alive_(keep_alive),
 			strategy_(strategy)
 		{}
 
@@ -101,7 +110,8 @@ namespace Client {
 			// a reference to the queue
 			auto& queue = scraper_.queue();
 
-			bool ok = true;
+			bool connection_ok = true;
+			bool input_ok = true;	// described below
 
 			do
 			{
@@ -130,34 +140,42 @@ namespace Client {
 					switch (ec.value())
 					{
 					case boost::system::errc::success:
-						ok = true;
+						connection_ok = true;
 
 						// also check the status
-						ok &= response.transmission_status == Server::OK;
+						connection_ok &= response.transmission_status == Server::OK;
 
 						// If everything is OK then pop the data from the queue.
-						if (ok)
+						if (connection_ok)
 							queue.pop();
 						break;
 					case connection_aborted:
 					case connection_reset:
 					case timed_out:
-						ok = false;
+						connection_ok = false;
 						break;
 					default:
 						// we throw for unhandled exceptions
 						throw boost::system::system_error(ec);
 					}
 				}
-			} while (ok && scraper_);
 
-			// With the current simple error-handling: 
-			// We always retry connecting, so long as the scraper is in good status.
-			return scraper_;
+				// With the current simple error-handling: 
+				// We always retry connecting, so long as 
+				// 1. the scraper is in good status, OR
+				// 2. there is still data in the queue, OR
+				// 3. keep_alive_;
+				// i.e. either keep_alive is set 
+				// or else we are not out of data yet.
+				input_ok = keep_alive_ || !queue.empty() || scraper_;
+			} while (connection_ok && input_ok);	
+
+			return input_ok;
 		}
 
 		Connector connector_;
 		Scraper scraper_;
+		bool keep_alive_;
 		Strategy strategy_;
 	};
 

@@ -1,3 +1,9 @@
+#################################################
+# CMake build system for TCPClientServer.       #
+#                                               #
+# (C) 2014 James Hirschorn                      #
+#################################################
+
 cmake_minimum_required (VERSION 3.0)
 
 project(TCPClientServer)
@@ -7,30 +13,11 @@ project(TCPClientServer)
 # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Set compiler flags and options. 
-# Here it is setting the Visual Studio warning level to 4
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+#----------------------------
+# PREPROCESSOR DEFINITIONS
+#----------------------------
 
-# Command to output information to the console
-# Useful for displaying errors, warnings, and debugging
-#message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
-
-# For some reason, CMake fails when the specific Boost libraries are required.
-# We use link_directories as a work around (see below).
-find_package(Boost 1.57 REQUIRED)
-if(NOT ${Boost_FOUND})
-	set(BOOST_ROOT $ENV{Boost_DIR} CACHE PATH "Boost library root directory")
-endif(NOT ${Boost_FOUND})
-
-#message("CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-if(${Boost_FOUND})
-	include_directories(${Boost_INCLUDE_DIRS})
-	# Work around.
-	link_directories(${Boost_LIBRARY_DIRS})
-endif(${Boost_FOUND})
-
-# Set the following preprocessor flag, if necessary.
+# Set the WIN32_WINNT preprocessor flag, if necessary.
 macro(get_WIN32_WINNT version)
     if (WIN32 AND CMAKE_SYSTEM_VERSION)
         set(ver ${CMAKE_SYSTEM_VERSION})
@@ -44,10 +31,55 @@ endmacro()
 get_WIN32_WINNT(ver)
 add_definitions(-D_WIN32_WINNT=${ver})
 
+# Set compiler flags and options. 
+# Here it is setting the Visual Studio warning level to 4
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+#message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
+
+#----------------------------
+# LIBRARIES
+#----------------------------
+
+# For some reason, CMake fails when the specific Boost libraries are required.
+# We use link_directories as a work around (see below).
+find_package(Boost 1.57 REQUIRED)
+if(NOT ${Boost_FOUND})
+	set(BOOST_ROOT $ENV{Boost_DIR} CACHE PATH "Boost library root directory")
+endif(NOT ${Boost_FOUND})
+
+find_package(OpenSSL)
+if(NOT ${OPENSSL_FOUND})
+	set(OPENSSL_ROOT $ENV{OPENSSL_DIR} CACHE PATH "OpenSSL library root directory")
+endif(NOT ${OPENSSL_FOUND})
+
+#----------------------------
+# INCLUDES
+#----------------------------
+
+# Include the root source dirctory.
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+if(${Boost_FOUND})
+	include_directories(${Boost_INCLUDE_DIRS})
+	# Work around.
+	link_directories(${Boost_LIBRARY_DIRS})
+endif(${Boost_FOUND})
+if(${OPENSSL_FOUND})
+	include_directories(${OPENSSL_INCLUDE_DIR})
+endif(${OPENSSL_FOUND})
+
+#----------------------------
+# INSTALLATION
+#----------------------------
+
 # Executables will be installed in the bin subdirectory of the root directory.
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 set(INSTALL_SUBDIR "bin")
+# Install the certificate authority file(s).
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ssl DESTINATION ${INSTALL_SUBDIR})
 
+#----------------------------
 # Sub-directories
+#----------------------------
+
 add_subdirectory(ClientServerFramework)
 add_subdirectory(ClientServerCalculator)

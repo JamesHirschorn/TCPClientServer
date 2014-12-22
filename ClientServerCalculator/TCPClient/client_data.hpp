@@ -13,7 +13,7 @@
 
 struct client_data
 {
-	enum operation_enum {NOP, ADD, SUBTRACT, MULTIPLY, DIVIDE};
+	enum operation_enum {NOP = 0, ADD, SUBTRACT, MULTIPLY, DIVIDE};
 
 	class operation_type
 	{
@@ -80,5 +80,8 @@ struct client_data
 
 /// overload << for operation_type
 std::ostream& operator<<(std::ostream& os, client_data::operation_type operation);
+
+/// overload << for client_data
+std::ostream& operator<<(std::ostream& os, client_data data);
 
 #endif	// !CALCULATOR_TCPCLIENT_CLIENT_DATA_HPP

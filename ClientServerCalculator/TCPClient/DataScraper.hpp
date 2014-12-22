@@ -28,7 +28,7 @@ private:
 			is >> item;
 
 		if (is.fail())
-			throw bad_data_exception();	// bad data entry
+			throw bad_data_error();	// bad data entry
 		if (is.bad())
 			throw std::runtime_error("I/O error on input stream.");
 	}

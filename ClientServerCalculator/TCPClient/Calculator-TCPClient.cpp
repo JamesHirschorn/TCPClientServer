@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -22,6 +23,8 @@ int main(int argc, char* argv[])
 				from the input. 
 			Strategy - what actions, if any, to perform on the data before 
 				sending and to perform on the server response. 
+
+		The data source the specified input file if given, or cin otherwise.
 	*/
 
 	typedef client_data									request_type;
@@ -35,15 +38,18 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		string host, service, client_id;
+		string host, service, client_id, filename;
 
-		if (argc != 4)
+		if (argc != 4 && argc != 5)
 		{
-			cerr << "Usage: " << argv[0] << " <client id> <host> <service/port>" << endl;
+			cerr << "Usage: " << argv[0] << " <client id> <host> <service/port> [<input filename>]" << endl;
 			exit(EXIT_FAILURE);
 		}
 			
 		client_id = argv[1];  host = argv[2]; service = argv[3];
+
+		if (argc > 4)
+			filename = argv[4];
 
 		boost::asio::io_service io_service;
 
@@ -51,12 +57,17 @@ int main(int argc, char* argv[])
 
 		// Create the internal client, using cin as the input stream, 
 		// and start it up.
-		client_type::create(io_service, client_id, host, service, cin, strategy)->start();
+		if (filename.empty())
+			client_type::create(io_service, client_id, host, service, cin, true, strategy)->start();
+		else
+		{
+			ifstream is(filename);
+			client_type::create(io_service, client_id, host, service, is, false, strategy)->start();
+		}
 	}
 	catch (exception& e)
 	{
 		cerr << e.what() << endl;
 		exit(EXIT_FAILURE);
 	}
-
 }

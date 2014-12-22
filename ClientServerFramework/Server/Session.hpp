@@ -41,7 +41,7 @@ namespace Server {
 		typedef std::shared_ptr<Session> pointer_type;
 		typedef Strategy strategy_type;
 
-		/// factory method (only way to create new Session[s]).
+		/// factory method (only way to create new Session`s).
 		static pointer_type create(boost::asio::io_service& io_service, strategy_type const& strategy)
 		{
 			return pointer_type(new Session(io_service, strategy));

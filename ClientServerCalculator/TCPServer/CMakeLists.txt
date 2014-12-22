@@ -4,7 +4,7 @@ source_group("Source Files" FILES ${SOURCES})
 
 add_executable(Calculator-TCPServer ${SOURCES})
 
-#target_link_libraries(Calculator-TCPServer ${Boost_LIBRARIES})
+target_link_libraries(Calculator-TCPServer ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
 
 set_target_properties(Calculator-TCPServer PROPERTIES FOLDER "ClientServerCalculator")
 

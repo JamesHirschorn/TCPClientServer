@@ -1,5 +1,6 @@
 /** 
  *	This is the generic Connector class for connecting clients to the Server.
+ *	It uses synchronous communication.
  *	
  *	Its functions are:
  *	1. To establish a connection with the server.
@@ -17,8 +18,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
-
-//#include <boost/asio/ssl.hpp>
+#include <boost/asio/ssl.hpp>
 
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 #include <ClientServerFramework/Server/Response.hpp>

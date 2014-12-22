@@ -46,7 +46,10 @@ namespace Client
 		}
 
 		/// thrown when attempt to read one item of data fails
-		class bad_data_exception : public std::exception
+		class bad_data_error : public std::exception
+		{};
+		/// thrown when input stream runs out of data
+		class out_of_data : public std::exception
 		{};
 	public:
 		void start() const
@@ -61,10 +64,16 @@ namespace Client
 					// push onto the queue
 					write_datum(d);
 				}
-				catch (bad_data_exception)
+				catch (out_of_data)
+				{
+					// wait for new data to arrive
+					continue;
+				}
+				catch (bad_data_error)
 				{
 					// Ignore this bad data item and continue scraping.
-					std::clog << "Ignoring bad data read from input." << std::endl << std::endl;
+					// Causes a race condition. Needs synchronization.
+					//std::clog << "Ignoring bad data read from input." << std::endl << std::endl;
 					continue;
 				}
 				catch (std::exception& e)

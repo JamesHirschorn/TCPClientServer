@@ -13,12 +13,29 @@ client_data DataScraper::get_datum() const
 {
 	static std::streamsize const max_input_length = 1000;
 	char buffer[max_input_length];
+	memset(buffer, 0, max_input_length);
 
 	client_data d;
 	d.client_id = client_id_;
 
 	// Note: Exception handling is done in Scraper.hpp.
-	input_stream().getline(buffer, max_input_length);
+	while (input_stream() && !input_stream().eof() && buffer[0] == 0)
+	{
+		input_stream().getline(buffer, max_input_length);
+/*		bool test1(input_stream());
+		bool test2 = input_stream().good();
+		bool test3 = input_stream().eof(); */
+	}
+
+	if (input_stream().bad())
+		throw std::runtime_error("Input stream corrupted.");
+
+	/*if (input_stream().eof())
+		input_stream().clear();*/
+
+	if (!buffer[0])
+		throw out_of_data();
+
 	// Read into a string stream rather than manipulate the input directly.
 	std::istringstream datum_input(buffer);
 
@@ -44,7 +61,7 @@ client_data DataScraper::get_datum() const
 		break;
 	default:
 		// invalid operation type
-		throw bad_data_exception();
+		throw bad_data_error();
 	}
 
 	get_item(datum_input, d.operand2);
