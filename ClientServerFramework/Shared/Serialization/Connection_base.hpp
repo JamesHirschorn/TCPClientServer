@@ -26,14 +26,16 @@
 
 #include <ClientServerFramework/Shared/Serialization/Connection_impl.hpp>
 
-#include <boost/asio.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/system/error_code.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <iomanip>
+#include <functional>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -48,11 +50,15 @@ namespace io {
 	* hexadecimal.
 	* @li The serialized data.
 	*/
+	template<typename InternetProtocol>
 	class Connection_base
 	{
-		//typedef typename InternetProtocol::socket socket_type;
+		typedef typename InternetProtocol::resolver resolver_type;
+	protected:
+		typedef std::function<void(boost::system::error_code const&, std::size_t)> async_handler_type;
 	public:
-
+		//typedef typename resolver_type::query query_type;
+		typedef typename resolver_type::iterator endpoint_iterator_type;
 		/// Get the underlying socket. Used for making a Connection or for accepting
 		/// an incoming connection.
 	/*	socket_type& socket()
@@ -61,15 +67,16 @@ namespace io {
 		}*/
 
 		/// Connect to the underlying socket.
-		template<typename Iterator>
-		Iterator connect(Iterator begin, boost::system::error_code& ec)
-		{
-			return impl_.connect(begin, ec);
-		}
+		virtual endpoint_iterator_type connect(
+			endpoint_iterator_type begin, 
+			boost::system::error_code& ec) = 0;
+		
 
 		/// Asynchronously write a data structure to the socket.
-		template <typename T, typename Handler>
-		void async_write(T const& t, Handler const& handler)
+		template <typename T>
+		void async_write(
+			T const& t, 
+			async_handler_type const& handler)
 		{
 			// Serialize the data first so we know how large it is.
 			std::ostringstream archive_stream;
@@ -97,7 +104,7 @@ namespace io {
 			buffers.push_back(boost::asio::buffer(outbound_header_));
 			buffers.push_back(boost::asio::buffer(outbound_data_));
 			//boost::asio::async_write(socket_, buffers, handler);
-			impl.async_write(buffers, handler);
+			async_write_impl(buffers, handler);
 		}
 
 		/// Synchronized write. 
@@ -130,15 +137,14 @@ namespace io {
 			buffers.push_back(boost::asio::buffer(outbound_header_));
 			buffers.push_back(boost::asio::buffer(outbound_data_));
 
-			//boost::asio::write(socket_, buffers, ec);
-			return boost::asio::write(socket_, buffers, boost::asio::transfer_all(), ec);
+			return write_impl(buffers, ec);
 		}
 
 		/// Asynchronously read a data structure from the socket.
-		template <typename T, typename Handler>
-		void async_read(T& t, Handler const& handler)
+		template <typename T>
+		void async_read(T& t, async_handler_type const& handler)
 		{
-			boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_), 
+			asyc_read_impl(inbound_header_, 
 				[this,&t,handler](boost::system::error_code const& ec, std::size_t len)
 			{
 				handle_read_header(ec, len, t, handler);
@@ -146,9 +152,9 @@ namespace io {
 		}
 
 		/// Handle a completed read of a message header. 
-		template <typename T, typename Handler>
+		template <typename T>
 		void handle_read_header(boost::system::error_code const& e, std::size_t len,
-			T& t, Handler const& handler)
+			T& t, async_handler_type const& handler)
 		{
 			if (e)
 			{
@@ -168,7 +174,7 @@ namespace io {
 
 				// Start an asynchronous call to receive the data.
 				inbound_data_.resize(inbound_data_size);
-				boost::asio::async_read(socket_, boost::asio::buffer(inbound_data_),
+				async_read_impl(inbound_data_
 					[this,&t,len,handler](boost::system::error_code const& ec, std::size_t next_len)
 				{
 					handle_read_data(ec, len + next_len, t, handler);
@@ -177,9 +183,9 @@ namespace io {
 		}
 
 		/// Handle a completed read of message data.
-		template <typename T, typename Handler>
+		template <typename T>
 		void handle_read_data(const boost::system::error_code& ec, std::size_t len,
-			T& t, Handler const& handler)
+			T& t, async_handler_type const& handler)
 		{
 			if (ec)
 			{
@@ -214,7 +220,8 @@ namespace io {
 
 			std::size_t length;
 
-			length = boost::asio::read(socket_, buffer(inbound_header_), ec);
+			//length = boost::asio::read(socket_, buffer(inbound_header_), ec);
+			length = read(inbound_header_, ec);
 
 			if (ec) 
 				return length;	// an error occurred.
@@ -231,7 +238,8 @@ namespace io {
 			}
 
 			inbound_data_.resize(inbound_data_size);
-			length += boost::asio::read(socket_, buffer(inbound_data_), ec);
+			//length += boost::asio::read(socket_, buffer(inbound_data_), ec);
+			length += read_impl(inbound_data_, ec);
 
 			// Extract the data structure from the data just received.
 			try
@@ -255,10 +263,10 @@ namespace io {
 		{}
 	protected:
 		/// Constructor.
-		Connection_base(boost::asio::io_service& io_service, detail::Connection_impl& impl)
+	/*	Connection_base(boost::asio::io_service& io_service)
 			: impl_(impl)
 		{
-		}
+		}*/
 	private:
 		/// The size of a fixed length header.
 		enum { header_length = 8 };
@@ -275,7 +283,21 @@ namespace io {
 		/// Holds the inbound data.
 		std::vector<char> inbound_data_;
 
-		detail::Connection_impl& impl_;
+		virtual void async_write_impl(
+			std::vector<boost::asio::const_buffer> const&, 
+			async_handler_type const&) = 0;
+
+		virtual void async_read_impl(
+			std::vector<char>&,
+			async_handler_type const&) = 0;
+
+		virtual std::size_t write_impl(
+			std::vector<boost::asio::const_buffer> const& buffers,
+			boost::system::error_code& ec) = 0;
+
+		virtual std::size_t read_impl(
+			std::vector<char>& b,
+			boost::system::error_code& ec) = 0;
 	};
 
 }	// namespace io

@@ -11,8 +11,8 @@
 #ifndef FRAMEWORK_CLIENT_CONNECTOR_HPP
 #define FRAMEWORK_CLIENT_CONNECTOR_HPP
 
-#include <memory>
-#include <string>
+#include <ClientServerFramework/Server/Response.hpp>
+#include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/connect.hpp>
@@ -21,8 +21,8 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/ssl.hpp>
 
-#include <ClientServerFramework/Shared/Serialization/Connection.hpp>
-#include <ClientServerFramework/Server/Response.hpp>
+#include <memory>
+#include <string>
 
 namespace Client
 {
@@ -61,14 +61,15 @@ namespace Client
 
 			// Attempts to connect to each of the end-points until successful, 
 			// or until all end-points have been tried.
-			auto point = connection_.connect(endpoints, ec);
+			auto point = connection_->connect(endpoints, ec);
 
 			// If successful, point will reference a valid end-point.
 			return point != endpoint_iterator_type();
 		}
 
 		/// opens a connection to the server asynchronously
-		template<typename Handler>
+		/// (Needs re-implementation.)
+		/*template<typename Handler>
 		void async_open(Handler const& handler)
 		{
 			// Resolve the query to a list of end-points.
@@ -82,7 +83,7 @@ namespace Client
 			{
 				handler(ec, iter);
 			});
-		}
+		}*/
 
 		/// Sends one time of data to the server
 		/// and then returns the server response.
@@ -96,12 +97,12 @@ namespace Client
 		{
 			// connection_ will automatically decode data 
 			// that is read/writes from/to the underlying socket.
-			sent_length = connection_.write(data, ec);
+			sent_length = connection_->write(data, ec);
 
 			response_type result;
 			if (!ec)
 			{
-				received_length = connection_.read(result, ec);
+				received_length = connection_->read(result, ec);
 			}
 
 			return result;
@@ -110,7 +111,7 @@ namespace Client
 		Connector(
 			boost::asio::io_service& io_service, 
 			std::string const& host, std::string const& service) :
-			connection_(io_service),
+			connection_(new io::Connection<InternetProtocol>(io_service)),
 			resolver_(io_service),
 			query_(host, service)
 		{}
@@ -130,14 +131,16 @@ namespace Client
 			// does nothing by default
 		}
 
-		/// The (serialized) connection to the server.
-		io::Connection_base connection_;
-
+		typedef io::Connection_base<InternetProtocol> connection_type;
 		typedef typename InternetProtocol::resolver resolver_type;
-		resolver_type resolver_;
 		typedef typename resolver_type::query query_type;
-		query_type query_;
 		typedef typename resolver_type::iterator endpoint_iterator_type;
+
+		/// The (serialized) connection to the server.
+		std::shared_ptr<connection_type> connection_;
+		resolver_type resolver_;
+		query_type query_;
+
 	};
 }	// namespace Client
 
