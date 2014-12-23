@@ -6,9 +6,7 @@ namespace io {
 	class Connection :
 		public Connection_base<InternetProtocol>
 	{
-	protected:
 		typedef InternetProtocol internet_protocol;
-	private:
 		typedef typename internet_protocol::socket socket_type;
 	public:
 		/// ctor
@@ -22,7 +20,6 @@ namespace io {
 		{
 			return boost::asio::connect(socket_, begin, ec);
 		}
-	//protected:
 		/// socket inspector
 		socket_type& socket()
 		{

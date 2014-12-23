@@ -39,7 +39,7 @@ namespace Server {
 	public:
 		typedef std::shared_ptr<Session> pointer_type;
 		typedef Strategy strategy_type;
-		typedef io::accepting_adaptor<io::Connection<InternetProtocol>> connection_type;
+		typedef io::Connection<InternetProtocol> connection_type;
 
 		/// factory method (only way to create new Session`s).
 		static pointer_type create(boost::asio::io_service& io_service, short port,
@@ -70,7 +70,7 @@ namespace Server {
 	protected:
 		/// ctor
 		Session(boost::asio::io_service& io_service, short port, strategy_type const& strategy) :
-			connection_(io_service, port), 
+			connection_(io_service), 
 			connected_(false),
 			strategy_(strategy)
 		{

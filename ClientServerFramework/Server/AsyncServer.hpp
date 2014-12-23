@@ -26,7 +26,6 @@ namespace Server {
 		AsyncServer(
 			boost::asio::io_service& io_service, short port, 
 			strategy_type strategy) :
-			io_service_(io_service),
 			port_(port),
 			strategy_(strategy),
 			acceptor_(io_service, InternetProtocol::endpoint(InternetProtocol::v4(), port))
@@ -38,11 +37,10 @@ namespace Server {
 		{
 			// Create a new session in anticipation of a client connection request.
 			SessionType::pointer_type new_session = 
-				SessionType::create(io_service_, port_, strategy_);
+				SessionType::create(acceptor_.get_io_service(), port_, strategy_);
 
 			// uses a lambda expression for the accept handler
 			acceptor_.async_accept(new_session->connection().socket(),
-			//new_session->connection().async_accept(
 				[this,new_session](boost::system::error_code const& ec)
 			{
 				if (!ec)
@@ -55,7 +53,6 @@ namespace Server {
 			});
 		}
 
-		boost::asio::io_service& io_service_;
 		short port_;
 		strategy_type strategy_;
 
