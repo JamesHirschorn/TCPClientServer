@@ -13,9 +13,6 @@ namespace Server {
 	class TCPSession :
 		public Session<boost::asio::ip::tcp, Strategy, ClientData, ServerData>
 	{
-	public:
-		explicit TCPSession(socket_type const& socket) : 
-			Session(socket) {}
 	};
 
 }	// namespace Server

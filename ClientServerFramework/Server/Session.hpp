@@ -11,14 +11,15 @@
 #ifndef FRAMEWORK_SERVER_SESSION_HPP
 #define FRAMEWORK_SERVER_SESSION_HPP
 
-#include <memory>
+#include <ClientServerFramework/Server/Response.hpp>
+#include <ClientServerFramework/Shared/Serialization/accepting_adaptor.hpp>
+#include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
-#include <ClientServerFramework/Shared/Serialization/Connection.hpp>
-#include <ClientServerFramework/Server/Response.hpp>
+#include <memory>
 
 namespace Server {
 
@@ -35,18 +36,19 @@ namespace Server {
 		// used to ensure that the session remains alive as long as a callback is pending
 		public std::enable_shared_from_this<Session<InternetProtocol, Strategy, ClientData, ServerData>>
 	{
-	protected:
-		typedef typename InternetProtocol::socket socket_type;
 	public:
 		typedef std::shared_ptr<Session> pointer_type;
 		typedef Strategy strategy_type;
+		typedef io::accepting_adaptor<io::Connection<InternetProtocol>> connection_type;
 
 		/// factory method (only way to create new Session`s).
-		static pointer_type create(boost::asio::io_service& io_service, strategy_type const& strategy)
+		static pointer_type create(boost::asio::io_service& io_service, short port,
+			strategy_type const& strategy)
 		{
-			return pointer_type(new Session(io_service, strategy));
+			return pointer_type(new Session(io_service, port, strategy));
 		}
 
+		/// Starts up the session.
 		void start()
 		{
 			// Session has doesome very basic logging.
@@ -55,10 +57,10 @@ namespace Server {
 			do_receive();
 		}
 
-		/// socket inspector
-		socket_type& socket()
+		/// connection inspector
+		connection_type& connection()
 		{
-			return connection_.socket();
+			return connection_;
 		}
 		/// dtor
 		~Session()
@@ -67,8 +69,9 @@ namespace Server {
 		}
 	protected:
 		/// ctor
-		Session(boost::asio::io_service& io_service, strategy_type const& strategy) : 
-			connection_(io_service), connected_(false),
+		Session(boost::asio::io_service& io_service, short port, strategy_type const& strategy) :
+			connection_(io_service, port), 
+			connected_(false),
 			strategy_(strategy)
 		{
 			session_id_ = count++;
@@ -129,7 +132,7 @@ namespace Server {
 			});
 		}
 
-		io::Connection<InternetProtocol> connection_;
+		connection_type connection_;
 		/// whether a connection with the client has been established yet
 		bool connected_;
 		Strategy strategy_;

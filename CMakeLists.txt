@@ -29,7 +29,7 @@ macro(get_WIN32_WINNT version)
 endmacro()
 
 get_WIN32_WINNT(ver)
-add_definitions(-D_WIN32_WINNT=${ver})
+add_definitions(-D_WIN32_WINNT=${ver} -D_SCL_SECURE_NO_WARNINGS)
 
 # Set compiler flags and options. 
 # Here it is setting the Visual Studio warning level to 4

@@ -6,6 +6,10 @@ namespace io {
 	class Connection :
 		public Connection_base<InternetProtocol>
 	{
+	protected:
+		typedef InternetProtocol internet_protocol;
+	private:
+		typedef typename internet_protocol::socket socket_type;
 	public:
 		/// ctor
 		Connection(boost::asio::io_service& io_service) :
@@ -18,12 +22,15 @@ namespace io {
 		{
 			return boost::asio::connect(socket_, begin, ec);
 		}
+	//protected:
+		/// socket inspector
+		socket_type& socket()
+		{
+			return socket_;
+		}
 	private:
-		typedef typename InternetProtocol::socket socket_type;
-		typedef typename InternetProtocol::acceptor acceptor_type;
 		/// The underlying socket.
 		socket_type socket_;
-		acceptor_type acceptor_;
 
 		void async_write_impl(
 			std::vector<boost::asio::const_buffer> const& buffers,
@@ -32,7 +39,14 @@ namespace io {
 			boost::asio::async_write(socket_, buffers, handler);
 		}
 
-		virtual void async_read_impl(
+		void async_read_impl(
+			input_header_type& input,
+			async_handler_type const& handler)
+		{
+			boost::asio::async_read(socket_, boost::asio::buffer(input), handler);
+		}
+
+		void async_read_impl(
 			std::vector<char>& input,
 			async_handler_type const& handler)
 		{
@@ -46,7 +60,16 @@ namespace io {
 			return boost::asio::write(socket_, buffers, boost::asio::transfer_all(), ec);
 		}
 
-		std::size_t read_impl(std::vector<char>& b, boost::system::error_code& ec)
+		std::size_t read_impl(
+			input_header_type& input,
+			boost::system::error_code& ec)
+		{
+			return boost::asio::read(socket_, boost::asio::buffer(input), ec);
+		}
+
+		std::size_t read_impl(
+			std::vector<char>& b, 
+			boost::system::error_code& ec)
 		{
 			return boost::asio::read(socket_, boost::asio::buffer(b), ec);
 		}

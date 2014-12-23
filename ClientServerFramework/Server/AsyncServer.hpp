@@ -19,18 +19,17 @@ namespace Server {
 	template<typename InternetProtocol, typename SessionType, typename Strategy>
 	class AsyncServer
 	{
-		typedef typename InternetProtocol::endpoint endpoint_type;
 	public:
 		typedef Strategy strategy_type;
 
 		/// ctor 
-		/// IPv4 is hard-coded for now. 
 		AsyncServer(
 			boost::asio::io_service& io_service, short port, 
 			strategy_type strategy) :
-			acceptor_(io_service, endpoint_type(InternetProtocol::v4(), port)),
-			socket_(io_service),
-			strategy_(strategy)
+			io_service_(io_service),
+			port_(port),
+			strategy_(strategy),
+			acceptor_(io_service, InternetProtocol::endpoint(InternetProtocol::v4(), port))
 		{
 			do_accept();
 		}
@@ -39,10 +38,11 @@ namespace Server {
 		{
 			// Create a new session in anticipation of a client connection request.
 			SessionType::pointer_type new_session = 
-				SessionType::create(acceptor_.get_io_service(), strategy_);
+				SessionType::create(io_service_, port_, strategy_);
 
 			// uses a lambda expression for the accept handler
-			acceptor_.async_accept(new_session->socket(),
+			acceptor_.async_accept(new_session->connection().socket(),
+			//new_session->connection().async_accept(
 				[this,new_session](boost::system::error_code const& ec)
 			{
 				if (!ec)
@@ -55,11 +55,12 @@ namespace Server {
 			});
 		}
 
+		boost::asio::io_service& io_service_;
+		short port_;
+		strategy_type strategy_;
+
 		typedef typename InternetProtocol::acceptor acceptor_type;
 		acceptor_type acceptor_;
-		typedef typename InternetProtocol::socket socket_type;
-		socket_type socket_;
-		strategy_type strategy_;
 	};
 
 }	// namespace Server
