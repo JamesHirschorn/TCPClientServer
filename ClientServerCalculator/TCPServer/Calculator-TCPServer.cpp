@@ -42,7 +42,13 @@ int main(int argc, char* argv[])
 
 		Strategy strategy;
 
-		server_type server(io_service, port, strategy);
+		// Create the SSL options struct.
+		string ssl_path = install_dir + '/' + ssl_subdir;
+		string ca_full_pathname = ssl_path + '/' + private_key_filename;
+		io::ssl_options SSL_options = { 
+			SSL_mode, ssl_verify_mode, ssl_path, private_key_filename, temporary_DH_filename };
+
+		server_type server(io_service, port, SSL_options, strategy);
 
 		// Start up the server.
 		io_service.run();

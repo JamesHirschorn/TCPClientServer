@@ -1,45 +1,39 @@
-/**
- *	Abstract base class for SSLConnection, to be subclassed 
- *	for the client and server separately.
- */
-
-#include <ClientServerFramework/Shared/SSL/SSL.hpp>
 #include <ClientServerFramework/Shared/Serialization/Connection_base.hpp>
 
+#include <boost/asio/io_service.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
 
-#include <iostream>
+#include <stdexcept>
 
 namespace io {
 
 	template<typename InternetProtocol>
-	class SSLConnection_base :
-		public Connection_base<
-			InternetProtocol, 
-			typename boost::asio::ssl::stream<typename InternetProtocol::socket>::lowest_layer_type>
+	class SSLConnection :
+		public Connection_base<InternetProtocol>
 	{
 		typedef InternetProtocol internet_protocol;
 		typedef boost::asio::ssl::stream<typename internet_protocol::socket> socket_type;
+		typedef typename socket_type::lowest_layer_type lowest_layer_type;
 		typedef boost::asio::ssl::context context_type;
 	public:
-		/// ctor
-		SSLConnection_base(
-			boost::asio::io_service& io_service, 
+		typedef std::function<void(boost::system::error_code const&)> async_handshake_handler;
+
+		SSLConnection(
+			boost::asio::io_service& io_service,
 			ssl_options const& options) :
 			context_(options.get_method()),
-			socket_(io_service, context_)
+			socket_(io_service, context_),
+			options_(options)
 		{
-			set_socket();
-			set_context();
 		}
 
 		endpoint_iterator_type connect(
 			endpoint_iterator_type begin,
 			boost::system::error_code& ec)
 		{
-			endpoint_iterator_type endpoint = 
-				boost::asio::connect(socket_.lowest_layer(), begin, ec);
+			endpoint_iterator_type endpoint =
+				boost::asio::connect(lowest_layer_socket(), begin, ec);
 
 			if (!ec)
 			{
@@ -51,17 +45,27 @@ namespace io {
 					throw ec;
 				}
 			}
-
 			return endpoint;
 		}
 
-		// blocking handshake
-		virtual boost::system::error_code handshake(boost::system::error_code & ec) = 0;
+		/// blocking handshake
+		virtual boost::system::error_code handshake(boost::system::error_code& ec)
+		{
+			// need this class to be concrete, so not pure virtual
+			throw std::logic_error("Not implemented.");
+		}
+
+		/// asynchronous handshake
+		void async_handshake(async_handshake_handler const& handler)
+		{
+			// need this class to be concrete, so not pure virtual
+			throw std::logic_error("Not implemented.");
+		}
 
 		/// dtor
-		virtual ~SSLConnection_base() = 0;
+		~SSLConnection() {}
 	protected:
-		/// socket inspector
+		/// socket inspectors
 		socket_type& socket()
 		{
 			return socket_;
@@ -75,16 +79,23 @@ namespace io {
 		{
 			return context_;
 		}
+		/// options inspector
+		ssl_options options() const
+		{
+			return options_;
+		}
 	private:
-		/// set up the socket (does nothing by default)
-		virtual void set_socket() {}
-		/// set up the context (does nothing by default)
-		virtual void set_context() {};
-
 		context_type context_;
 
-		/// The underlying socket.
+		/// the underlying socket
 		socket_type socket_;
+
+		ssl_options options_;
+
+		/// set up the socket (does nothing by default)
+		virtual void setup_socket() {}
+		/// set up the context (does nothing by default)
+		virtual void setup_context() {};
 
 		/* implementation of abstract methods */
 
@@ -92,48 +103,43 @@ namespace io {
 			std::vector<boost::asio::const_buffer> const& buffers,
 			async_handler_type const& handler)
 		{
-			boost::asio::async_write(socket_, buffers, handler);
+			boost::asio::async_write(socket(), buffers, handler);
 		}
 
 		void async_read_impl(
 			input_header_type& input,
 			async_handler_type const& handler)
 		{
-			boost::asio::async_read(socket_, boost::asio::buffer(input), handler);
+			boost::asio::async_read(socket(), boost::asio::buffer(input), handler);
 		}
 
 		void async_read_impl(
 			std::vector<char>& input,
 			async_handler_type const& handler)
 		{
-			boost::asio::async_read(socket_, boost::asio::buffer(input), handler);
+			boost::asio::async_read(socket(), boost::asio::buffer(input), handler);
 		}
 
 		std::size_t write_impl(
 			std::vector<boost::asio::const_buffer> const& buffers,
 			boost::system::error_code& ec)
 		{
-			return boost::asio::write(socket_, buffers, boost::asio::transfer_all(), ec);
+			return boost::asio::write(socket(), buffers, boost::asio::transfer_all(), ec);
 		}
 
 		std::size_t read_impl(
 			input_header_type& input,
 			boost::system::error_code& ec)
 		{
-			return boost::asio::read(socket_, boost::asio::buffer(input), ec);
+			return boost::asio::read(socket(), boost::asio::buffer(input), ec);
 		}
 
 		std::size_t read_impl(
 			std::vector<char>& b,
 			boost::system::error_code& ec)
 		{
-			return boost::asio::read(socket_, boost::asio::buffer(b), ec);
+			return boost::asio::read(socket(), boost::asio::buffer(b), ec);
 		}
 	};
 
-	template<typename InternetProtocol>
-	SSLConnection_base<InternetProtocol>::~SSLConnection_base()
-	{
-	}
-
-}
+}	// namespace io

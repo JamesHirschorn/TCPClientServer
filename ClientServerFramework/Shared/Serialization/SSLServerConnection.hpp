@@ -1,4 +1,4 @@
-#include <ClientServerFramework/Shared/Serialization/SSLConnection_base.hpp>
+#include <ClientServerFramework/Shared/Serialization/SSLConnection.hpp>
 
 #include <boost/asio/ssl/stream_base.hpp>
 
@@ -6,20 +6,29 @@ namespace io {
 
 	template<typename InternetProtocol>
 	class SSLServerConnection :
-		public SSLConnection_base < InternetProtocol >
+		public ServerConnection_base<InternetProtocol>
 	{
 	public:
 		SSLServerConnection(
 			boost::asio::io_service& io_service,
 			ssl_options const& options) :
-			SSLConnection_base(io_service, options),
+			SSLConnection_base<InternetProtocol>(io_service, options),
 			options_(options)
-		{}
-
-		// blocking handshake from Client
-		boost::system::error_code handshake(boost::system::error_code & ec)
 		{
-			return socket().handshake(boost::asio::ssl::stream_base::client, ec);
+			setup_socket();
+			setup_context();
+		}
+
+		/// asynchronous handshake from Server
+		void async_handshake(aync_handshake_handler const& handler)
+		{
+			socket().async_handshake(boost::asio::ssl::stream_base::server, handler); 
+		}
+
+		/// asnychronous accept
+		void async_accept(acceptor_type& acceptor, acceptor_handle_type const& handler)
+		{
+			acceptor.async_accept(lowest_layer_socket(), handler);
 		}
 
 		/// dtor
@@ -37,9 +46,16 @@ namespace io {
 
 		void set_context()
 		{
-			context().load_verify_file(ca_filename);
+			context().set_options(options().context_options);
+			context().set_password_callback(get_password);
+			context().use_private_key_file(options().get_certificate_full_pathname());
+			context().use_tmp_dh_file(options().get_DH_full_pathname());
 		}
 
+		std::string get_password() const
+		{
+			return options().password; 
+		}
 		/// can be used, e.g. for verifying a certificate
 		virtual bool ssl_verify_callback(
 			bool preverified, // True if the certificate passed pre-verification.

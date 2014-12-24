@@ -21,8 +21,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef FRAMEWORK_SERIALIZATION_CONNECTION_HPP
-#define FRAMEWORK_SERIALIZATION_CONNECTION_HPP
+#ifndef FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
+#define FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/read.hpp>
@@ -50,19 +50,16 @@ namespace io {
 	* hexadecimal.
 	* @li The serialized data.
 	*/
-	template<
-		typename InternetProtocol,
-		typename SocketLowestLayer = typename InternetProtocol::socket>
+	template<typename InternetProtocol>
 	class Connection_base
 	{
 		/// The size of the fixed length header.
 		enum { header_length = 8 };
-
-		typedef typename InternetProtocol::resolver resolver_type;
 	public:
+		typedef InternetProtocol internet_protocol;
+		typedef typename internet_protocol::resolver resolver_type;
 		typedef typename resolver_type::iterator endpoint_iterator_type;
 		typedef std::function<void(boost::system::error_code const&, std::size_t)> async_handler_type;
-		typedef typename InternetProtocol::socket lowest_layer_type;
 
 		/// Connect to the underlying socket (blocking).
 		virtual endpoint_iterator_type connect(
@@ -242,7 +239,6 @@ namespace io {
 
 
 			inbound_data_.resize(inbound_data_size);
-			//length += boost::asio::read(socket_, buffer(inbound_data_), ec);
 			length += read_impl(inbound_data_, ec);
 
 			// Extract the data structure from the data just received.
@@ -262,9 +258,6 @@ namespace io {
 
 			return length;
 		}
-	
-		/// Access the lowest layer socket (just the socket if only one layer).
-		virtual lowest_layer_type& lowest_layer_socket() = 0;
 		
 		/// dtor
 		virtual ~Connection_base() 
@@ -311,4 +304,4 @@ namespace io {
 
 }	// namespace io
 
-#endif // !FRAMEWORK_SERIALIZATION_CONNECTION_HPP
+#endif // !FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP

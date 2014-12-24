@@ -12,7 +12,7 @@
 #define FRAMEWORK_CLIENT_CONNECTOR_HPP
 
 #include <ClientServerFramework/Server/Response.hpp>
-#include <ClientServerFramework/Shared/Serialization/Connection.hpp>
+#include <ClientServerFramework/Shared/Serialization/ClientConnection.hpp>
 #include <ClientServerFramework/Shared/Serialization/SSLClientConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
@@ -125,7 +125,7 @@ namespace Client
 			switch (SSL_options.mode)
 			{
 			case OFF:
-				conn = new Connection<InternetProtocol>(io_service);
+				conn = new ClientConnection<InternetProtocol>(io_service);
 				break;
 			case SSLV23:
 				conn = new SSLClientConnection<InternetProtocol>(io_service, SSL_options);

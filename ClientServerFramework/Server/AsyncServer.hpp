@@ -26,23 +26,27 @@ namespace Server {
 		/// IPv4 hard-coded for now
 		AsyncServer(
 			boost::asio::io_service& io_service, short port, 
+			io::ssl_options const& SSL_options,
 			strategy_type strategy) :
-			port_(port),
 			strategy_(strategy),
 			acceptor_(io_service, internet_protocol::endpoint(internet_protocol::v4(), port))
 		{
-			do_accept();
+			do_accept(port, SSL_options);
 		}
 	private:
-		void do_accept()
+		void do_accept(short port, io::ssl_options const& SSL_options)
 		{
-			// Create a new session in anticipation of a client connection request.
+			// Create a new session. 
 			SessionType::pointer_type new_session = 
-				SessionType::create(acceptor_.get_io_service(), port_, strategy_);
+				SessionType::create(acceptor_.get_io_service(), port, SSL_options, strategy_);
 
+
+			// Set the connection to accept incoming client connections.
 			// uses a lambda expression for the accept handler
-			acceptor_.async_accept(new_session->connection().socket(),
-				[this,new_session](boost::system::error_code const& ec)
+			new_session->connection()->async_accept(acceptor_, 
+				//[this,new_session]
+			//acceptor_.async_accept(new_session->connection().socket(),
+				[this,new_session,port,SSL_options](boost::system::error_code const& ec)
 			{
 				if (!ec)
 				{
@@ -50,11 +54,10 @@ namespace Server {
 					new_session->start();
 				}
 
-				do_accept();
+				do_accept(port, SSL_options);
 			});
 		}
 
-		short port_;
 		strategy_type strategy_;
 
 		typedef typename SessionType::internet_protocol internet_protocol;

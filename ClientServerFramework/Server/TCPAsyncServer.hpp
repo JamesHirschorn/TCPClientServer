@@ -15,8 +15,11 @@ namespace Server {
 		public AsyncServer<SessionType, Strategy>
 	{
 	public:
-		TCPAsyncServer(boost::asio::io_service& io_service, short port, Strategy const& strategy) :
-			AsyncServer(io_service, port, strategy)
+		TCPAsyncServer(
+			boost::asio::io_service& io_service, short port, 
+			io::ssl_options const& SSL_options, 
+			Strategy const& strategy) :
+			AsyncServer(io_service, port, SSL_options, strategy)
 		{
 		}
 	};

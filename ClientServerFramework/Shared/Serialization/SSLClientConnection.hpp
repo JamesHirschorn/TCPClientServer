@@ -1,20 +1,20 @@
-#include <ClientServerFramework/Shared/Serialization/SSLConnection_base.hpp>
-
-#include <boost/asio/ssl/stream_base.hpp>
+#include <ClientServerFramework/Shared/Serialization/SSLConnection.hpp>
 
 namespace io {
 
 	template<typename InternetProtocol>
 	class SSLClientConnection :
-		public SSLConnection_base < InternetProtocol >
+		public SSLConnection<InternetProtocol>	
 	{
 	public:
 		SSLClientConnection(
 			boost::asio::io_service& io_service,
 			ssl_options const& options) :
-			SSLConnection_base(io_service, options),
-			options_(options)
-		{}
+			SSLConnection<InternetProtocol>(io_service, options)
+		{
+			setup_socket();
+			setup_context();
+		}
 
 		// blocking handshake from Client
 		boost::system::error_code handshake(boost::system::error_code & ec)
@@ -22,12 +22,32 @@ namespace io {
 			return socket().handshake(boost::asio::ssl::stream_base::client, ec);
 		}
 
+		endpoint_iterator_type connect(
+			endpoint_iterator_type begin,
+			boost::system::error_code& ec)
+		{
+			endpoint_iterator_type endpoint =
+				boost::asio::connect(lowest_layer_socket(), begin, ec);
+
+			if (!ec)
+			{
+				// Perform SSL handshake immediately after openning the connection.
+				handshake(ec);
+				if (ec)
+				{
+					std::cerr << "SSL Handshake failed with error message: " << ec.message() << std::endl;
+					throw ec;
+				}
+			}
+			return endpoint;
+		}
+
 		/// dtor
 		~SSLClientConnection() {}
 	private:
-		void set_socket() 
+		void setup_socket()
 		{
-			socket().set_verify_mode(options_.verify_mode);
+			socket().set_verify_mode(options().verify_mode);
 			socket().set_verify_callback(
 				[this](bool preverified, boost::asio::ssl::verify_context& ctx)
 			{
@@ -35,13 +55,13 @@ namespace io {
 			});
 		}
 
-		void set_context()
+		void setup_context()
 		{
-			context().load_verify_file(ca_filename);
+			context().load_verify_file(options().get_certificate_full_pathname());
 		}
 
 		/// can be used, e.g. for verifying a certificate
-		virtual bool ssl_verify_callback(
+		bool ssl_verify_callback(
 			bool preverified, // True if the certificate passed pre-verification.
 			boost::asio::ssl::verify_context& ctx // The peer certificate and other context.
 			)
@@ -53,8 +73,6 @@ namespace io {
 			std::cout << "Verifying " << subject_name << std::endl;
 			return preverified;
 		}
-
-		ssl_options options_;
 	};
 
 }	// namespace io

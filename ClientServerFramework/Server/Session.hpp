@@ -13,6 +13,7 @@
 
 #include <ClientServerFramework/Server/Response.hpp>
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
+#include <ClientServerFramework/Shared/Serialization/ServerConnection.hpp>
 #include <ClientServerFramework/Shared/Serialization/SSLServerConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
@@ -38,13 +39,16 @@ namespace Server {
 		typedef std::shared_ptr<Session> pointer_type;
 		typedef Strategy strategy_type;
 		typedef InternetProtocol internet_protocol;
-		typedef io::Connection_base<InternetProtocol> connection_type;
+		typedef io::ServerConnection_base<InternetProtocol> connection_type;
+		typedef std::shared_ptr<connection_type> connection_pointer_type;
 
 		/// factory method (only way to create new Session`s).
-		static pointer_type create(boost::asio::io_service& io_service, short port,
+		static pointer_type create(
+			boost::asio::io_service& io_service, short port,
+			io::ssl_options const& SSL_options,
 			strategy_type const& strategy)
 		{
-			return pointer_type(new Session(io_service, port, strategy));
+			return pointer_type(new Session(io_service, port, SSL_options, strategy));
 		}
 
 		/// Starts up the session.
@@ -57,7 +61,7 @@ namespace Server {
 		}
 
 		/// connection inspector
-		connection_type& connection()
+		connection_pointer_type connection()
 		{
 			return connection_;
 		}
@@ -91,7 +95,7 @@ namespace Server {
 
 			// Capturing self with the lambda expression ensures that the Session remains alive
 			// until the handler has completed executing (and possibly longer).
-			connection_.async_read(cdata_, 
+			connection_->async_read(cdata_, 
 				[this,self](boost::system::error_code const& ec, std::size_t length)
 			{
 				if (!ec)
@@ -121,7 +125,7 @@ namespace Server {
 
 			auto self(shared_from_this());
 
-			connection_.async_write(response_,
+			connection_->async_write(response_,
 				[this, self](boost::system::error_code const& ec, std::size_t length)
 			{
 				if (!ec)
@@ -134,7 +138,7 @@ namespace Server {
 			});
 		}
 
-		std::shared_ptr<connection_type> connection_;
+		connection_pointer_type connection_;
 		/// whether a connection with the client has been established yet
 		bool connected_;
 		Strategy strategy_;
@@ -154,7 +158,7 @@ namespace Server {
 			switch (SSL_options.mode)
 			{
 			case OFF:
-				conn = new Connection<InternetProtocol>(io_service);
+				conn = new ServerConnection<InternetProtocol>(new Connection<InternetProtocol>(io_service));
 				break;
 			case SSLV23:
 				conn = new SSLServerConnection<InternetProtocol>(io_service, SSL_options);

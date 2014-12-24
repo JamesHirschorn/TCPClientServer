@@ -1,3 +1,10 @@
+/** 
+ *	Concrete implementation of Connection_base<InternetProtocol>.
+ */
+
+#ifndef FRAMEWORK_SHARED_SERIALIZATION_CONNECTION_HPP
+#define FRAMEWORK_SHARED_SERIALIZATION_CONNECTION_HPP
+
 #include <ClientServerFramework/Shared/Serialization/Connection_base.hpp>
 
 namespace io {
@@ -20,15 +27,6 @@ namespace io {
 		{
 			return boost::asio::connect(socket_, begin, ec);
 		}
-		/// socket inspector
-		lowest_layer_type& lowest_layer_socket()
-		{
-			return socket_;	// only one layer in this case
-		}
-		/*socket_type& socket()
-		{
-			return socket_;
-		}*/
 	private:
 		/// The underlying socket.
 		socket_type socket_;
@@ -78,4 +76,6 @@ namespace io {
 		}
 	};
 
-}
+}	// namespace io
+
+#endif	// !FRAMEWORK_SHARED_SERIALIZATION_CONNECTION_HPP
