@@ -16,19 +16,20 @@
 
 namespace Server {
 
-	template<typename InternetProtocol, typename SessionType, typename Strategy>
+	template<typename SessionType, typename Strategy>
 	class AsyncServer
 	{
 	public:
 		typedef Strategy strategy_type;
 
 		/// ctor 
+		/// IPv4 hard-coded for now
 		AsyncServer(
 			boost::asio::io_service& io_service, short port, 
 			strategy_type strategy) :
 			port_(port),
 			strategy_(strategy),
-			acceptor_(io_service, InternetProtocol::endpoint(InternetProtocol::v4(), port))
+			acceptor_(io_service, internet_protocol::endpoint(internet_protocol::v4(), port))
 		{
 			do_accept();
 		}
@@ -56,7 +57,8 @@ namespace Server {
 		short port_;
 		strategy_type strategy_;
 
-		typedef typename InternetProtocol::acceptor acceptor_type;
+		typedef typename SessionType::internet_protocol internet_protocol;
+		typedef typename internet_protocol::acceptor acceptor_type;
 		acceptor_type acceptor_;
 	};
 

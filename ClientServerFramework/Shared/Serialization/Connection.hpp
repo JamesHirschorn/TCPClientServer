@@ -21,13 +21,19 @@ namespace io {
 			return boost::asio::connect(socket_, begin, ec);
 		}
 		/// socket inspector
-		socket_type& socket()
+		lowest_layer_type& lowest_layer_socket()
+		{
+			return socket_;	// only one layer in this case
+		}
+		/*socket_type& socket()
 		{
 			return socket_;
-		}
+		}*/
 	private:
 		/// The underlying socket.
 		socket_type socket_;
+
+		/* implementation of abstract methods */
 
 		void async_write_impl(
 			std::vector<boost::asio::const_buffer> const& buffers,

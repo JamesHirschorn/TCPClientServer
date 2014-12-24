@@ -26,18 +26,19 @@
 #ifndef FRAMEWORK_CLIENT_CLIENT_HPP
 #define FRAMEWORK_CLIENT_CLIENT_HPP
 
+#include <ClientServerFramework/Server/Response.hpp>
+#include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
+#include <ClientServerFramework/Shared/SSL/SSL.hpp>
+
+#include <boost/asio/error.hpp>
+#include <boost/system/error_code.hpp>
+
 #include <iostream>
 #include <istream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <thread>
-
-#include <boost/asio/error.hpp>
-#include <boost/system/error_code.hpp>
-
-#include <ClientServerFramework/Server/Response.hpp>
-#include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
 
 namespace Client {
 
@@ -47,20 +48,22 @@ namespace Client {
 	public:
 		typedef std::shared_ptr<Client> pointer_type;
 
-		/// factory method (for convenience)
+		/// factory method 
 		/// keep_alive indicates whether to keep the session alive 
 		/// (from the client end) when the queue is empty and 
 		/// the input stream is in the EOF state. This would be set to true
 		/// for cin, but possibly false for a file stream.
 		static pointer_type create(
 			boost::asio::io_service& io_service, 
+			io::ssl_options const& SSL_options,
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
-			std::istream& is, bool keep_alive,
+			std::istream& is, bool keep_alive, 
 			Strategy const& strategy)
 		{
 			return pointer_type(
-				new Client(io_service, client_id, host, service, is, keep_alive, strategy));
+				new Client(io_service, SSL_options, 
+					client_id, host, service, is, keep_alive, strategy));
 		}
 
 		/// starts the client
@@ -100,11 +103,12 @@ namespace Client {
 		/// ctor
 		Client(
 			boost::asio::io_service& io_service,
+			io::ssl_options const& SSL_options,
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
 			std::istream& is, bool keep_alive,
 			Strategy const& strategy) :
-			connector_(io_service, host, service),
+			connector_(io_service, SSL_options, host, service),
 			scraper_(is, client_id),
 			keep_alive_(keep_alive),
 			strategy_(strategy)

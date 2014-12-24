@@ -3,16 +3,16 @@
 *	See AsyncServer.hpp for documentation.
 */
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
 #include <ClientServerFramework/Server/AsyncServer.hpp>
+#include <ClientServerFramework/Server/TCPSession.hpp>
+
+#include <boost/asio/io_service.hpp>
 
 namespace Server {
 
 	template<typename SessionType, typename Strategy>
 	class TCPAsyncServer :
-		public AsyncServer<boost::asio::ip::tcp, SessionType, Strategy>
+		public AsyncServer<SessionType, Strategy>
 	{
 	public:
 		TCPAsyncServer(boost::asio::io_service& io_service, short port, Strategy const& strategy) :

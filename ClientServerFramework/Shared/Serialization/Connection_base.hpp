@@ -50,18 +50,21 @@ namespace io {
 	* hexadecimal.
 	* @li The serialized data.
 	*/
-	template<typename InternetProtocol>
+	template<
+		typename InternetProtocol,
+		typename SocketLowestLayer = typename InternetProtocol::socket>
 	class Connection_base
 	{
-		/// The size of a fixed length header.
+		/// The size of the fixed length header.
 		enum { header_length = 8 };
 
 		typedef typename InternetProtocol::resolver resolver_type;
 	public:
 		typedef typename resolver_type::iterator endpoint_iterator_type;
 		typedef std::function<void(boost::system::error_code const&, std::size_t)> async_handler_type;
+		typedef typename InternetProtocol::socket lowest_layer_type;
 
-		/// Connect to the underlying socket.
+		/// Connect to the underlying socket (blocking).
 		virtual endpoint_iterator_type connect(
 			endpoint_iterator_type begin, 
 			boost::system::error_code& ec) = 0;
@@ -259,6 +262,10 @@ namespace io {
 
 			return length;
 		}
+	
+		/// Access the lowest layer socket (just the socket if only one layer).
+		virtual lowest_layer_type& lowest_layer_socket() = 0;
+		
 		/// dtor
 		virtual ~Connection_base() 
 		{}

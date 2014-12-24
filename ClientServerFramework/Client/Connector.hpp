@@ -13,15 +13,12 @@
 
 #include <ClientServerFramework/Server/Response.hpp>
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
+#include <ClientServerFramework/Shared/Serialization/SSLClientConnection.hpp>
 
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/connect.hpp>
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/read.hpp>
-#include <boost/asio/write.hpp>
-#include <boost/asio/ssl.hpp>
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 
 namespace Client
@@ -38,23 +35,12 @@ namespace Client
 	public:
 		typedef std::shared_ptr<Client<InternetProtocol, ClientData, Response>> pointer_type;
 
-		/// Factory method for constructing a Client.
-		static pointer_type create(
-			boost::asio::io_service& io_service,
-			std::string const& host, std::string const& service)
-		{
-			return pointer_type(new Connector(io_service, host, service));
-		}
-
 		/// Non-copy constructible.
 		Connector(Connector const& other) = delete;
 
 		/// opens a connection to the server
 		bool open(boost::system::error_code& ec)
 		{
-			// Perfrom necessary socket setup, if any.
-			set_socket();
-
 			// Resolve the query to a list of end-points.
 			// The end-points may contain both IPv4 and IPv6 end-points.
 			endpoint_iterator_type endpoints = resolver_.resolve(query_);
@@ -110,26 +96,13 @@ namespace Client
 	protected:
 		Connector(
 			boost::asio::io_service& io_service, 
+			io::ssl_options const& SSL_options,
 			std::string const& host, std::string const& service) :
-			connection_(new io::Connection<InternetProtocol>(io_service)),
+			connection_(get_connection(io_service, SSL_options)),
 			resolver_(io_service),
 			query_(host, service)
 		{}
 	private:
-		/// used for verifying a certificate
-		virtual bool ssl_verify_callback(
-			bool preverified, // True if the certificate passed pre-verification.
-			boost::asio::ssl::verify_context& ctx // The peer certificate and other context.
-			)
-		{
-			// default implementation does nothing since we might not be using SSL
-			return preverified;
-		}
-		/// socket set up
-		virtual void set_socket()
-		{
-			// does nothing by default
-		}
 
 		typedef io::Connection_base<InternetProtocol> connection_type;
 		typedef typename InternetProtocol::resolver resolver_type;
@@ -141,6 +114,28 @@ namespace Client
 		resolver_type resolver_;
 		query_type query_;
 
+		connection_type* get_connection(
+			boost::asio::io_service& io_service, 
+			io::ssl_options const& SSL_options)
+		{
+			using namespace io;
+
+			connection_type* conn;
+
+			switch (SSL_options.mode)
+			{
+			case OFF:
+				conn = new Connection<InternetProtocol>(io_service);
+				break;
+			case SSLV23:
+				conn = new SSLClientConnection<InternetProtocol>(io_service, SSL_options);
+				break;
+			default:
+				throw std::runtime_error("Invalid SSL mode.");
+			}
+
+			return conn;
+		}
 	};
 }	// namespace Client
 

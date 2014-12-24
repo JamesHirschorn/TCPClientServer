@@ -1,11 +1,19 @@
-#include <iostream>
-#include <string>
-
 #include <ClientServerFramework/Server/TCPAsyncServer.hpp>
-#include <ClientServerFramework/Server/TCPSession.hpp>
 #include <ClientServerCalculator/TCPClient/client_data.hpp>
 #include <ClientServerCalculator/TCPServer/server_data.hpp>
 #include <ClientServerCalculator/TCPServer/ServerAction.hpp>
+
+#include <iostream>
+#include <string>
+
+/// Of course, these must be compatible with the server settings.
+io::ssl_mode SSL_mode(io::SSLV23); // io::OFF (see SSH.hpp)
+
+boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_peer;
+std::string const install_dir = INSTALL_DIRECTORY;
+std::string const ssl_subdir = "ssl";	// where to look for certificates
+std::string const private_key_filename = "newcert.pem";
+std::string const temporary_DH_filename = "dh512.pm";
 
 int main(int argc, char* argv[])
 {

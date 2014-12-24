@@ -29,7 +29,7 @@ macro(get_WIN32_WINNT version)
 endmacro()
 
 get_WIN32_WINNT(ver)
-add_definitions(-D_WIN32_WINNT=${ver} -D_SCL_SECURE_NO_WARNINGS)
+add_definitions(-D_WIN32_WINNT=${ver} -D_SCL_SECURE_NO_WARNINGS) 
 
 # Set compiler flags and options. 
 # Here it is setting the Visual Studio warning level to 4
@@ -76,6 +76,8 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 set(INSTALL_SUBDIR "bin")
 # Install the certificate authority file(s).
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ssl DESTINATION ${INSTALL_SUBDIR})
+# Make the install directory accessible from the source code.
+add_definitions(-DINSTALL_DIRECTORY="${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}")
 
 #----------------------------
 # Sub-directories

@@ -7,9 +7,11 @@ file(GLOB SHARED_SOURCES "Shared/*.hpp")
 file(GLOB SHARED_DESIGNPATTERNS_SOURCES "Shared/DesignPatterns/*.hpp")
 file(GLOB SHARED_CONTAINER_SOURCES "Shared/Container/*.h" "Shared/Container/*.hpp")
 file(GLOB SHARED_SERIALIZATION_SOURCES "Shared/Serialization/*.h" "Shared/Serialization/*.hpp")
+file(GLOB SHARED_SSL_SOURCES "Shared/SSL/*.hpp")
 
-set(ALL_SOURCES ${SOURCES};${CLIENT_SOURCES};${SERVER_SOURCES};${SHARED_SOURCES};
-				${SHARED_CONTAINER_SOURCES};${SHARED_SERIALIZATION_SOURCES};${SHARED_DESIGNPATTERNS_SOURCES})
+set(ALL_SOURCES ${SOURCES};${CLIENT_SOURCES};${SERVER_SOURCES};
+	${SHARED_SOURCES};${SHARED_CONTAINER_SOURCES};${SHARED_SERIALIZATION_SOURCES};
+	${SHARED_DESIGNPATTERNS_SOURCES};${SHARED_SSL_SOURCES})
 #message("Sources: " ${ALL_SOURCES})
 
 # Set up folders in Visual Studio.
@@ -17,11 +19,11 @@ set(BASE_DIR "Source Files")
 source_group(${BASE_DIR} FILES ${SOURCES})
 source_group("${BASE_DIR}\\Client" FILES ${CLIENT_SOURCES})
 source_group("${BASE_DIR}\\Server" FILES ${SERVER_SOURCES})
-#source_group("${BASE_DIR}\\ClientServer" FILES ${CLIENTSERVER_SOURCES})
 source_group("${BASE_DIR}\\Shared" FILES ${SHARED_SOURCES})
 source_group("${BASE_DIR}\\Shared\\DesignPatterns" FILES ${SHARED_DESIGNPATTERNS_SOURCES})
 source_group("${BASE_DIR}\\Shared\\Container" FILES ${SHARED_CONTAINER_SOURCES})
 source_group("${BASE_DIR}\\Shared\\Serialization" FILES ${SHARED_SERIALIZATION_SOURCES})
+source_group("${BASE_DIR}\\Shared\\SSL" FILES ${SHARED_SSL_SOURCES})
 
 add_library(ClientServerFramework ${ALL_SOURCES})
 

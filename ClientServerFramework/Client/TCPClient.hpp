@@ -3,8 +3,6 @@
 *	See Client.hpp for documentation.
 */
 
-#include <boost/asio/ip/tcp.hpp>
-
 #include <ClientServerFramework/Client/Client.hpp>
 #include <ClientServerFramework/Client/TCPConnector.hpp>
 

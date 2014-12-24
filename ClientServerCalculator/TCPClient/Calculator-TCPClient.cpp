@@ -1,12 +1,20 @@
-#include <fstream>
-#include <iostream>
-#include <string>
-
 #include <ClientServerFramework/Client/TCPClient.hpp>
 #include <ClientServerCalculator/TCPServer/server_data.hpp>
 #include <ClientServerCalculator/TCPClient/client_data.hpp>
 #include <ClientServerCalculator/TCPClient/DataScraper.hpp>
 #include <ClientServerCalculator/TCPClient/ClientActions.hpp>
+
+#include <fstream>
+#include <iostream>
+#include <string>
+
+/// Hard-coded settings
+/// Of course, these must be compatible with the server settings.
+io::ssl_mode SSL_mode(io::SSLV23); // io::OFF (see SSH.hpp)
+boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_peer;
+std::string const install_dir = INSTALL_DIRECTORY;
+std::string const ssl_subdir = "ssl";	// where to look for certificates
+std::string const ca_filename = "newcert.pem";
 
 int main(int argc, char* argv[])
 {
@@ -55,19 +63,29 @@ int main(int argc, char* argv[])
 
 		strategy_type strategy;
 
+		// Create the SSL options struct.
+		string ssl_path = install_dir + '/' + ssl_subdir;
+		string ca_full_pathname = ssl_path + '/' + ca_filename;
+		io::ssl_options ssl_options = { SSL_mode, ssl_verify_mode, ssl_path, ca_filename };
+
 		// Create the internal client, using cin as the input stream, 
 		// and start it up.
 		if (filename.empty())
-			client_type::create(io_service, client_id, host, service, cin, true, strategy)->start();
+			client_type::create(io_service, ssl_options, client_id, host, service, cin, true, strategy)->start();
 		else
 		{
 			ifstream is(filename);
-			client_type::create(io_service, client_id, host, service, is, false, strategy)->start();
+			client_type::create(io_service, ssl_options, client_id, host, service, is, false, strategy)->start();
 		}
 	}
 	catch (exception& e)
 	{
 		cerr << e.what() << endl;
+		exit(EXIT_FAILURE);
+	}
+	catch (boost::system::error_code& e)
+	{
+		cerr << e.message() << endl;
 		exit(EXIT_FAILURE);
 	}
 }
