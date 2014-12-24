@@ -14,6 +14,7 @@
 #include <ClientServerFramework/Server/Response.hpp>
 #include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 #include <ClientServerFramework/Shared/Serialization/ServerConnection.hpp>
+#include <ClientServerFramework/Shared/Serialization/SSLConnection.hpp>
 #include <ClientServerFramework/Shared/Serialization/SSLServerConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
@@ -161,7 +162,7 @@ namespace Server {
 				conn = new ServerConnection<InternetProtocol>(new Connection<InternetProtocol>(io_service));
 				break;
 			case SSLV23:
-				conn = new SSLServerConnection<InternetProtocol>(io_service, SSL_options);
+				conn = new SSLServerConnection<InternetProtocol>(new SSLConnection<InternetProtocol>(io_service, SSL_options));
 				break;
 			default:
 				throw std::runtime_error("Invalid SSL mode.");

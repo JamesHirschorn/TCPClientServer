@@ -144,80 +144,6 @@ namespace io {
 			});
 		}
 
-		/// Handle a completed read of a message header. 
-		template <typename T>
-		void handle_read_header(boost::system::error_code const& e, std::size_t len,
-			T& t, async_handler_type const& handler)
-		{
-			if (e)
-			{
-				handler(e, len);
-			}
-			else
-			{
-				// Determine the length of the serialized data.
-				std::size_t inbound_data_size;
-				if (!handle_determine_data_size(inbound_data_size, len, handler))
-					return;	// problem
-
-				// Start an asynchronous call to receive the data.
-				inbound_data_.resize(inbound_data_size);
-				async_read_impl(inbound_data_,
-					[this,&t,len,handler](boost::system::error_code const& ec, std::size_t next_len)
-				{
-					handle_read_data(ec, len + next_len, t, handler);
-				});
-			}
-		}
-
-		// Determine the length of the serialized data.
-		bool handle_determine_data_size(
-			std::size_t& inbound_data_size, 
-			std::size_t len, 
-			async_handler_type handler)
-		{
-			std::string header_copy; header_copy.resize(header_length);
-			std::copy(inbound_header_.begin(), inbound_header_.end(), header_copy.begin());
-			std::istringstream is(header_copy);
-			inbound_data_size = 0;
-			if (!(is >> std::hex >> inbound_data_size))
-			{
-				// Header doesn't seem to be valid. Inform the caller.
-				if (handler)
-					handler(boost::asio::error::invalid_argument, len);
-				return false;
-			}
-			return true;
-		}
-
-		/// Handle a completed read of message data.
-		template <typename T>
-		void handle_read_data(const boost::system::error_code& ec, std::size_t len,
-			T& t, async_handler_type const& handler)
-		{
-			if (ec)
-			{
-				handler(ec, len);
-			}
-			else
-			{
-				// Extract the data structure from the data just received.
-				try
-				{
-					std::string archive_data(&inbound_data_[0], inbound_data_.size());
-					std::istringstream archive_stream(archive_data);
-					boost::archive::text_iarchive archive(archive_stream);
-					archive >> t;
-				}
-				catch (std::exception& e)
-				{
-					throw e;
-				}
-
-				// Inform caller that data has been received ok.
-				handler(ec, len);
-			}
-		}
 		
 		/// Synchronously read the data from the socket.
 		/// Return value indicates the number of bytes read.
@@ -276,6 +202,86 @@ namespace io {
 
 		/// Holds the inbound data.
 		std::vector<char> inbound_data_;
+
+		/* Handlers */
+
+		/// Handle a completed read of a message header. 
+		template <typename T>
+		void handle_read_header(boost::system::error_code const& e, std::size_t len,
+			T& t, async_handler_type const& handler)
+		{
+			if (e)
+			{
+				handler(e, len);
+			}
+			else
+			{
+				// Determine the length of the serialized data.
+				std::size_t inbound_data_size;
+				if (!handle_determine_data_size(inbound_data_size, len, handler))
+					return;	// problem
+
+				// Start an asynchronous call to receive the data.
+				inbound_data_.resize(inbound_data_size);
+				async_read_impl(inbound_data_,
+					[this, &t, len, handler](boost::system::error_code const& ec, std::size_t next_len)
+				{
+					handle_read_data(ec, len + next_len, t, handler);
+				});
+			}
+		}
+
+		// Determine the length of the serialized data.
+		bool handle_determine_data_size(
+			std::size_t& inbound_data_size,
+			std::size_t len,
+			async_handler_type handler)
+		{
+			std::string header_copy; header_copy.resize(header_length);
+			std::copy(inbound_header_.begin(), inbound_header_.end(), header_copy.begin());
+			std::istringstream is(header_copy);
+			inbound_data_size = 0;
+			if (!(is >> std::hex >> inbound_data_size))
+			{
+				// Header doesn't seem to be valid. Inform the caller.
+				if (handler)
+					handler(boost::asio::error::invalid_argument, len);
+				return false;
+			}
+			return true;
+		}
+
+		/// Handle a completed read of message data.
+		template <typename T>
+		void handle_read_data(const boost::system::error_code& ec, std::size_t len,
+			T& t, async_handler_type const& handler)
+		{
+			if (ec)
+			{
+				handler(ec, len);
+			}
+			else
+			{
+				// Extract the data structure from the data just received.
+				try
+				{
+					std::string archive_data(&inbound_data_[0], inbound_data_.size());
+					std::istringstream archive_stream(archive_data);
+					boost::archive::text_iarchive archive(archive_stream);
+					archive >> t;
+				}
+				catch (std::exception& e)
+				{
+					throw e;
+				}
+
+				// Inform caller that data has been received ok.
+				handler(ec, len);
+			}
+		}
+
+		/* Hooks, for the Template Method design pattern where 
+		   the template methods are the I/O methods in the interface. */
 
 		virtual void async_write_impl(
 			std::vector<boost::asio::const_buffer> const&, 

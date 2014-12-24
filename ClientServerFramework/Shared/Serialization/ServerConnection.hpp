@@ -11,13 +11,11 @@ namespace io {
 		public ServerConnection_base<InternetProtocol>
 	{
 	public:
-		typedef InternetProtocol internet_protocol;
-		typedef typename internet_protocol::acceptor acceptor_type;
-		typedef std::function<void(boost::system::error_code&)> acceptor_handle_type;
-		typedef Connection_base<internet_protocol> base_connection_type;
-		typedef std::shared_ptr<base_connection_type> connection_pointer;
+		/// Concrete component in the decorator pattern.
+		typedef Connection<internet_protocol> concrete_component_type;
+		typedef std::shared_ptr<concrete_component_type> connection_pointer;
 
-		ServerConnection(base_connection_type* connection)
+		ServerConnection(concrete_component_type* connection)
 			: connection_(connection)
 		{
 		}
@@ -31,11 +29,12 @@ namespace io {
 		}
 
 		/// asychronous acceptor
-		void async_accept(acceptor_type& acceptor, acceptor_handle_type const& handler)
+		void async_accept(acceptor_type& acceptor, acceptor_handler_type const& handler)
 		{
-			acceptor.aysnc_accept(connection_->socket(), handler);
+			acceptor.async_accept(connection_->socket(), handler);
 		}
 	private:
+		/// as in the decorator pattern
 		connection_pointer connection_;
 
 		/* implementation of abstract methods */

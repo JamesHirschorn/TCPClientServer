@@ -15,12 +15,11 @@ namespace io {
 		public Connection_base<InternetProtocol>
 	{
 	public:
-		typedef InternetProtocol internet_protocol;
 		typedef typename internet_protocol::acceptor acceptor_type;
-		typedef std::function<void(boost::system::error_code&)> acceptor_handle_type;
+		typedef std::function<void(boost::system::error_code const&)> acceptor_handler_type;
 
 		/// asychronous acceptor
-		virtual void async_accept(acceptor_type& acceptor, acceptor_handle_type const& handler) = 0;
+		virtual void async_accept(acceptor_type& acceptor, acceptor_handler_type const& handler) = 0;
 	};
 
 }

@@ -3,12 +3,12 @@
 *	See Connector.hpp for documentation.
 */
 
-#include <string>
-#include <utility>
+#include <ClientServerFramework/Client/Connector.hpp>
 
 #include <boost/asio/ip/tcp.hpp>
 
-#include <ClientServerFramework/Client/Connector.hpp>
+#include <string>
+#include <utility>
 
 namespace Client {
 

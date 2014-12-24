@@ -30,7 +30,7 @@
 #include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
 #include <ClientServerFramework/Shared/SSL/SSL.hpp>
 
-#include <boost/asio/error.hpp>
+#include <boost/asio/io_service.hpp>
 #include <boost/system/error_code.hpp>
 
 #include <iostream>

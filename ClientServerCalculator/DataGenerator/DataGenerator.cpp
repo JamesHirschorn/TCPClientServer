@@ -9,16 +9,17 @@
  *	Usage: DataGenerator <data size> [<seed>] [<sigma>]
  *
  *	seed is the optional random number seed, and sigma determines
- *	the distribution of the operands as N(0,sigma^2).
+ *	the distribution of the operands as N(0,sigma^2), i.e. normally 
+ *  distributed.
  */
+
+#include <ClientServerCalculator/TCPClient/client_data.hpp>
+#include <ClientServerCalculator/TCPClient/client_data.cpp>	// include external definitions
 
 #include <cstdint>
 #include <iostream>
 #include <random>
 #include <string>
-
-#include <ClientServerCalculator/TCPClient/client_data.hpp>
-#include <ClientServerCalculator/TCPClient/client_data.cpp>	// include external definitions
 
 double const default_sigma = 1000000;
 

@@ -7,12 +7,13 @@
 #ifndef FRAMEWORK_SERVER_ASYNCSERVER_HPP
 #define FRAMEWORK_SERVER_ASYNCSERVER_HPP
 
-#include <memory>
-#include <utility>
+#include <ClientServerFramework/Server/Session.hpp>
+#include <ClientServerFramework/Shared/SSL/SSL.hpp>
 
 #include <boost/asio/io_service.hpp>
 
-#include <ClientServerFramework/Server/Session.hpp>
+#include <memory>
+#include <utility>
 
 namespace Server {
 
@@ -61,7 +62,7 @@ namespace Server {
 		strategy_type strategy_;
 
 		typedef typename SessionType::internet_protocol internet_protocol;
-		typedef typename internet_protocol::acceptor acceptor_type;
+		typedef typename SessionType::connection_type::acceptor_type acceptor_type;
 		acceptor_type acceptor_;
 	};
 

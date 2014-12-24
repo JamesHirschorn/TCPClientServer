@@ -1,3 +1,4 @@
+#include <ClientServerFramework/Shared/Serialization/ServerConnection_base.hpp>
 #include <ClientServerFramework/Shared/Serialization/SSLConnection.hpp>
 
 #include <boost/asio/ssl/stream_base.hpp>
@@ -9,31 +10,43 @@ namespace io {
 		public ServerConnection_base<InternetProtocol>
 	{
 	public:
-		SSLServerConnection(
-			boost::asio::io_service& io_service,
-			ssl_options const& options) :
-			SSLConnection_base<InternetProtocol>(io_service, options),
-			options_(options)
+		/// Concrete component in the decorator pattern.
+		typedef SSLConnection<internet_protocol> concrete_component_type;
+		typedef std::shared_ptr<concrete_component_type> connection_pointer;
+		typedef typename SSLConnection<internet_protocol>::async_handshake_handler_type async_handshake_handler_type;
+
+		/// ctor
+		SSLServerConnection(concrete_component_type* connection)
+			: connection_(connection)
 		{
-			setup_socket();
-			setup_context();
+		}
+
+		/// Connect to the underlying socket (blocking).
+		endpoint_iterator_type connect(
+			endpoint_iterator_type begin,
+			boost::system::error_code& ec)
+		{
+			return connection_->connect(begin, ec);
 		}
 
 		/// asynchronous handshake from Server
-		void async_handshake(aync_handshake_handler const& handler)
+		void async_handshake(async_handshake_handler_type const& handler)
 		{
-			socket().async_handshake(boost::asio::ssl::stream_base::server, handler); 
+			connection_->socket().async_handshake(boost::asio::ssl::stream_base::server, handler); 
 		}
 
 		/// asnychronous accept
-		void async_accept(acceptor_type& acceptor, acceptor_handle_type const& handler)
+		void async_accept(acceptor_type& acceptor, acceptor_handler_type const& handler)
 		{
-			acceptor.async_accept(lowest_layer_socket(), handler);
+			acceptor.async_accept(connection_->lowest_layer_socket(), handler);
 		}
 
 		/// dtor
 		~SSLServerConnection() {}
 	private:
+		/// as in the decorator pattern
+		connection_pointer connection_;
+
 		void set_socket()
 		{
 			socket().set_verify_mode(options_.verify_mode);
@@ -44,33 +57,49 @@ namespace io {
 			});
 		}
 
-		void set_context()
+		/* implementation of abstract methods */
+
+		void async_write_impl(
+			std::vector<boost::asio::const_buffer> const& buffers,
+			async_handler_type const& handler)
 		{
-			context().set_options(options().context_options);
-			context().set_password_callback(get_password);
-			context().use_private_key_file(options().get_certificate_full_pathname());
-			context().use_tmp_dh_file(options().get_DH_full_pathname());
+			connection_->async_write_impl(buffers, handler);
 		}
 
-		std::string get_password() const
+		void async_read_impl(
+			input_header_type& input,
+			async_handler_type const& handler)
 		{
-			return options().password; 
-		}
-		/// can be used, e.g. for verifying a certificate
-		virtual bool ssl_verify_callback(
-			bool preverified, // True if the certificate passed pre-verification.
-			boost::asio::ssl::verify_context& ctx // The peer certificate and other context.
-			)
-		{
-			// In this example we will simply print the certificate's subject name.
-			char subject_name[256];
-			X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
-			X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-			std::cout << "Verifying " << subject_name << std::endl;
-			return preverified;
+			connection_->async_read_impl(input, handler);
 		}
 
-		ssl_options options_;
+		void async_read_impl(
+			std::vector<char>& input,
+			async_handler_type const& handler)
+		{
+			connection_->async_read_impl(input, handler);
+		}
+
+		std::size_t write_impl(
+			std::vector<boost::asio::const_buffer> const& buffers,
+			boost::system::error_code& ec)
+		{
+			return connection_->write_impl(buffers, ec);
+		}
+
+		std::size_t read_impl(
+			input_header_type& input,
+			boost::system::error_code& ec)
+		{
+			return connection_->read_impl(input, ec);
+		}
+
+		std::size_t read_impl(
+			std::vector<char>& b,
+			boost::system::error_code& ec)
+		{
+			return connection_->read_impl(b, ec);
+		}
 	};
 
 }	// namespace io

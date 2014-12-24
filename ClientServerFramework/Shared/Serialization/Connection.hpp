@@ -13,7 +13,6 @@ namespace io {
 	class Connection :
 		public Connection_base<InternetProtocol>
 	{
-		typedef InternetProtocol internet_protocol;
 		typedef typename internet_protocol::socket socket_type;
 	public:
 		/// ctor
@@ -26,6 +25,11 @@ namespace io {
 			boost::system::error_code& ec)
 		{
 			return boost::asio::connect(socket_, begin, ec);
+		}
+		/// socket inspector
+		socket_type& socket()
+		{
+			return socket_;
 		}
 	private:
 		/// The underlying socket.
@@ -74,6 +78,11 @@ namespace io {
 		{
 			return boost::asio::read(socket_, boost::asio::buffer(b), ec);
 		}
+
+		/// Since the hooks are being used in conjunction with the decorator pattern, 
+		/// the concrete decorator classes will also need to be able to access them.
+		template<typename Protocol>
+		friend class ServerConnection;
 	};
 
 }	// namespace io

@@ -13,7 +13,6 @@ namespace io {
 			SSLConnection<InternetProtocol>(io_service, options)
 		{
 			setup_socket();
-			setup_context();
 		}
 
 		// blocking handshake from Client
@@ -53,11 +52,6 @@ namespace io {
 			{
 				return ssl_verify_callback(preverified, ctx);
 			});
-		}
-
-		void setup_context()
-		{
-			context().load_verify_file(options().get_certificate_full_pathname());
 		}
 
 		/// can be used, e.g. for verifying a certificate

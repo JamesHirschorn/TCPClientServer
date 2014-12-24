@@ -10,9 +10,10 @@
 
 /// Hard-coded settings
 /// Of course, these must be compatible with the server settings.
-io::ssl_mode SSL_mode(io::SSLV23); // io::OFF (see SSH.hpp)
-boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_peer;
+//io::ssl_mode const SSL_mode = io::SSLV23;	// (see SSL.hpp)
+io::ssl_mode const SSL_mode = io::OFF;		// (no SSL, see SSL.hpp)
 long const context_options = boost::asio::ssl::context::default_workarounds;
+boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_peer;
 std::string const install_dir = INSTALL_DIRECTORY;
 std::string const ssl_subdir = "ssl";	// where to look for certificates
 std::string const ca_filename = "newcert.pem";
@@ -68,8 +69,8 @@ int main(int argc, char* argv[])
 		string ssl_path = install_dir + '/' + ssl_subdir;
 		io::ssl_options SSL_options = { 
 			SSL_mode, 
-			ssl_verify_mode, 
 			context_options,
+			ssl_verify_mode, 
 			ssl_path, 
 			ca_filename };
 
