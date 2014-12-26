@@ -16,10 +16,21 @@ namespace io {
 	{
 	public:
 		typedef typename internet_protocol::acceptor acceptor_type;
-		typedef std::function<void(boost::system::error_code const&)> acceptor_handler_type;
+		typedef std::function<void(boost::system::error_code const&)> initialize_handler_type;
+		typedef std::function<void(boost::system::error_code const&)> accept_handler_type;
+
+		/// addition server initialization, if any (does nothing by default)
+		virtual void async_initialize(initialize_handler_type const& handler)
+		{
+			using namespace boost::system;
+
+			error_code ec;
+
+			handler(ec);
+		}
 
 		/// asychronous acceptor
-		virtual void async_accept(acceptor_type& acceptor, acceptor_handler_type const& handler) = 0;
+		virtual void async_accept(acceptor_type& acceptor, accept_handler_type const& handler) = 0;
 	};
 
 }

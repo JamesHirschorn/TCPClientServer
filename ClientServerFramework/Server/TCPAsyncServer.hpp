@@ -10,9 +10,9 @@
 
 namespace Server {
 
-	template<typename SessionType, typename Strategy>
+	template<typename ClientData, typename ServerData, typename Strategy>
 	class TCPAsyncServer :
-		public AsyncServer<SessionType, Strategy>
+		public AsyncServer<TCPSession<Strategy, ClientData, ServerData>, Strategy>
 	{
 	public:
 		TCPAsyncServer(

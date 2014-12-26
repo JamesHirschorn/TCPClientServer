@@ -17,8 +17,10 @@ long const context_options =
 boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_peer;
 std::string const install_dir = INSTALL_DIRECTORY;
 std::string const ssl_subdir = "ssl";	// where to look for certificates
-std::string const private_key_filename = "newcert.pem";
-std::string const temporary_DH_filename = "dh512.pm";
+std::string const ca_filename = "ca_cert.pem";
+std::string const private_key_filename = "ssl_priv.pem";
+std::string const password = "password";
+std::string const temporary_DH_filename = "dh1024.pem";
 
 int main(int argc, char* argv[])
 {
@@ -34,18 +36,13 @@ int main(int argc, char* argv[])
 			exit(EXIT_FAILURE);
 		}
 
-		boost::asio::io_service io_service;
+		/* Define the Server type. */
 
-		typedef client_data										ClientData;
-		typedef server_data										ServerData;
-		typedef ServerAction<ClientData, ServerData>			Strategy;
-		typedef TCPSession<Strategy, ClientData, ServerData>	Session;
+		typedef client_data											ClientData;
+		typedef server_data											ServerData;
+		typedef ServerAction<ClientData, ServerData>				Strategy;
 
-		typedef TCPAsyncServer<Session, Strategy>				server_type;
-
-		short port = std::atoi(argv[1]);
-
-		Strategy strategy;
+		typedef TCPAsyncServer<ClientData, ServerData, Strategy>	server_type;
 
 		// Create the SSL options struct.
 		string ssl_path = install_dir + '/' + ssl_subdir;
@@ -55,9 +52,16 @@ int main(int argc, char* argv[])
 			context_options,
 			ssl_verify_mode, 
 			ssl_path, 
-			std::string(),
+			ca_filename,
 			private_key_filename, 
+			password,
 			temporary_DH_filename };
+
+		/* Create the Server. */
+
+		boost::asio::io_service io_service;
+		short port = std::atoi(argv[1]);
+		Strategy strategy;
 
 		server_type server(io_service, port, SSL_options, strategy);
 
@@ -69,5 +73,9 @@ int main(int argc, char* argv[])
 		cerr << e.what() << endl;
 		exit(EXIT_FAILURE);
 	}
-
+	catch (boost::system::error_code& e)
+	{
+		cerr << e.message() << endl;
+		exit(EXIT_FAILURE);
+	}
 }

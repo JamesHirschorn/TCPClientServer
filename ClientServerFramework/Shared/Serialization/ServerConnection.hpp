@@ -20,16 +20,8 @@ namespace io {
 		{
 		}
 
-		/// Connect to the underlying socket (blocking).
-		endpoint_iterator_type connect(
-			endpoint_iterator_type begin,
-			boost::system::error_code& ec)
-		{
-			return connection_->connect(begin, ec);
-		}
-
 		/// asychronous acceptor
-		void async_accept(acceptor_type& acceptor, acceptor_handler_type const& handler)
+		void async_accept(acceptor_type& acceptor, accept_handler_type const& handler)
 		{
 			acceptor.async_accept(connection_->socket(), handler);
 		}

@@ -21,26 +21,6 @@ namespace io {
 			return socket().handshake(boost::asio::ssl::stream_base::client, ec);
 		}
 
-		endpoint_iterator_type connect(
-			endpoint_iterator_type begin,
-			boost::system::error_code& ec)
-		{
-			endpoint_iterator_type endpoint =
-				boost::asio::connect(lowest_layer_socket(), begin, ec);
-
-			if (!ec)
-			{
-				// Perform SSL handshake immediately after openning the connection.
-				handshake(ec);
-				if (ec)
-				{
-					std::cerr << "SSL Handshake failed with error message: " << ec.message() << std::endl;
-					throw ec;
-				}
-			}
-			return endpoint;
-		}
-
 		/// dtor
 		~SSLClientConnection() {}
 	private:

@@ -21,14 +21,6 @@ namespace io {
 		{
 		}
 
-		/// Connect to the underlying socket (blocking).
-		endpoint_iterator_type connect(
-			endpoint_iterator_type begin,
-			boost::system::error_code& ec)
-		{
-			return connection_->connect(begin, ec);
-		}
-
 		/// asynchronous handshake from Server
 		void async_handshake(async_handshake_handler_type const& handler)
 		{
@@ -36,7 +28,7 @@ namespace io {
 		}
 
 		/// asnychronous accept
-		void async_accept(acceptor_type& acceptor, acceptor_handler_type const& handler)
+		void async_accept(acceptor_type& acceptor, accept_handler_type const& handler)
 		{
 			acceptor.async_accept(connection_->lowest_layer_socket(), handler);
 		}

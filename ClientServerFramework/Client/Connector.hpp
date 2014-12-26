@@ -103,7 +103,6 @@ namespace Client
 			query_(host, service)
 		{}
 	private:
-
 		typedef io::Connection_base<InternetProtocol> connection_type;
 		typedef typename InternetProtocol::resolver resolver_type;
 		typedef typename resolver_type::query query_type;

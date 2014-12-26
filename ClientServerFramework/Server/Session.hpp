@@ -40,7 +40,7 @@ namespace Server {
 		typedef std::shared_ptr<Session> pointer_type;
 		typedef Strategy strategy_type;
 		typedef InternetProtocol internet_protocol;
-		typedef io::ServerConnection_base<InternetProtocol> connection_type;
+		typedef io::ServerConnection_base<internet_protocol> connection_type;
 		typedef std::shared_ptr<connection_type> connection_pointer_type;
 
 		/// factory method (only way to create new Session`s).
@@ -57,8 +57,16 @@ namespace Server {
 		{
 			// Session has doesome very basic logging.
 			std::clog << "Client connection with session id " << session_id_ << "." << std::endl;
-			// Start receiving data from the client.
-			do_receive();
+			// Begin communications with client by initializing the session.
+			try
+			{
+				do_initialize();
+			}
+#pragma warning(disable:4101)
+			catch (boost::system::error_code& ec)
+			{
+				// For now we do nothing, but additonal error handling could be added here.
+			}
 		}
 
 		/// connection inspector
@@ -78,7 +86,6 @@ namespace Server {
 			io::ssl_options const& SSL_options,
 			strategy_type const& strategy) :
 			connection_(get_connection(io_service, SSL_options)), 
-			connected_(false),
 			strategy_(strategy)
 		{
 			session_id_ = count++;
@@ -88,27 +95,45 @@ namespace Server {
 		/// session counter
 		static size_t count; 
 
-		void do_receive()
+		/// connection initialization
+		void do_initialize()
+		{
+			auto self(shared_from_this());
+
+			// Capturing self with the lambda expression ensures that the Session remains alive
+			// until the handler chain has completed execution.
+			connection_->async_initialize(
+				[this, self](boost::system::error_code const& ec)
+			{
+				if (!ec)
+				{
+					do_receive(true);
+				}
+				else
+				{
+					throw boost::system::system_error(ec);
+				}
+			});
+		}
+
+		/// receive implementation
+		void do_receive(bool first)
 		{
 			using namespace boost::asio;
 
 			auto self(shared_from_this());
 
-			// Capturing self with the lambda expression ensures that the Session remains alive
-			// until the handler has completed executing (and possibly longer).
 			connection_->async_read(cdata_, 
-				[this,self](boost::system::error_code const& ec, std::size_t length)
+				[this, self, first](boost::system::error_code const& ec, std::size_t length)
 			{
 				if (!ec)
 				{
-					if (!connected_)
+					if (first)	// first read of the session
 					{
-						std::clog << "Session " << session_id_ << ": Client ID is " 
+						std::clog << "Session " << session_id_ << ": Client ID is "
 							<< cdata_.client_id << '.' << std::endl;
-						connected_ = true;
 					}
 					std::clog << "Session " << session_id_ << ": " << length << " bytes received." << std::endl;
-
 
 					// perform the strategy on the received data
 					response_.data = strategy_(cdata_);
@@ -119,7 +144,8 @@ namespace Server {
 				}
 			});
 		}
-
+		
+		/// reply implementation
 		void do_reply()
 		{
 			using namespace boost::asio;
@@ -134,19 +160,18 @@ namespace Server {
 					std::clog << "Session " << session_id_ << ": " << length << " bytes sent." << std::endl;
 
 					// Go back into a receiving state.
-					do_receive();
+					do_receive(false);
 				}
 			});
 		}
 
 		connection_pointer_type connection_;
-		/// whether a connection with the client has been established yet
-		bool connected_;
 		Strategy strategy_;
 		ClientData cdata_;
 		Response<ServerData> response_;
 		std::size_t session_id_;
 
+		/// factory method
 		connection_type* get_connection(
 			boost::asio::io_service& io_service,
 			io::ssl_options const& SSL_options)
@@ -176,4 +201,5 @@ namespace Server {
 	std::size_t Session<InternetProtocol, Strategy, ClientData, ServerData>::count = 0;
 }	// namespace Server
 
+#pragma warning(default:4101)
 #endif	// !FRAMEWORK_SERVER_SESSION_HPP

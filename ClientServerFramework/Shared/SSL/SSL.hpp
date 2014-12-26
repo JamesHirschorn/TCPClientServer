@@ -1,4 +1,4 @@
-/** Handle SSL options. */
+/** Handle SSL options, including setting up the SSL context. */
 
 #ifndef FRAMEWORK_SHARED_SSH_HPP
 #define FRAMEWORK_SHARED_SSH_HPP
@@ -32,15 +32,16 @@ namespace io {
 				context.load_verify_file(get_full_pathname(certificate_filename));
 			if (!private_key_filename.empty())
 			{
-				context.use_private_key_file(
-					get_full_pathname(private_key_filename),
-					boost::asio::ssl::context::pem);
 				context.set_password_callback(
 					[this](std::size_t max_size, 
 					boost::asio::ssl::context::password_purpose purpose)
 				{ 
 					return get_password(max_size, purpose); 
 				});
+				context.use_certificate_chain_file(get_full_pathname(certificate_filename));
+				context.use_private_key_file(
+					get_full_pathname(private_key_filename),
+					boost::asio::ssl::context::pem);
 			}
 			if (context_options & boost::asio::ssl::context::single_dh_use)
 				context.use_tmp_dh_file(get_full_pathname(DH_filename));

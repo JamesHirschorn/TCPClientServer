@@ -63,8 +63,12 @@ namespace io {
 
 		/// Connect to the underlying socket (blocking).
 		virtual endpoint_iterator_type connect(
-			endpoint_iterator_type begin, 
-			boost::system::error_code& ec) = 0;
+			endpoint_iterator_type begin,
+			boost::system::error_code& ec)
+		{
+			// Not used by the server in our design.
+			throw std::runtime_error("connet not implemented.");
+		};
 
 		/// Asynchronously write a data structure to the socket.
 		template <typename T>
