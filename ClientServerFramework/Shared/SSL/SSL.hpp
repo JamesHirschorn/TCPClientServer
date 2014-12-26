@@ -10,7 +10,7 @@
 
 namespace io {
 
-	enum ssl_mode { OFF, SSLV23 };
+	enum ssl_mode { OFF, SSLV23, SSLV3 };
 
 	struct ssl_options
 	{
@@ -55,9 +55,11 @@ namespace io {
 			{
 			case OFF:
 				throw std::runtime_error("SSL is disabled.");
-
 			case SSLV23:
 				return boost::asio::ssl::context::sslv23;
+				break;
+			case SSLV3:
+				return boost::asio::ssl::context::sslv3;
 				break;
 			default:
 				throw std::runtime_error("Invalid SSL mode.");

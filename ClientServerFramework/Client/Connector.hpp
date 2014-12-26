@@ -127,6 +127,7 @@ namespace Client
 				conn = new ClientConnection<InternetProtocol>(io_service);
 				break;
 			case SSLV23:
+			case SSLV3:
 				conn = new SSLClientConnection<InternetProtocol>(io_service, SSL_options);
 				break;
 			default:

@@ -187,6 +187,7 @@ namespace Server {
 				conn = new ServerConnection<InternetProtocol>(new Connection<InternetProtocol>(io_service));
 				break;
 			case SSLV23:
+			case SSLV3:
 				conn = new SSLServerConnection<InternetProtocol>(new SSLConnection<InternetProtocol>(io_service, SSL_options));
 				break;
 			default:

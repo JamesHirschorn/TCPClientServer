@@ -67,7 +67,7 @@ namespace io {
 			boost::system::error_code& ec)
 		{
 			// Not used by the server in our design.
-			throw std::runtime_error("connet not implemented.");
+			throw std::runtime_error("connect not implemented.");
 		};
 
 		/// Asynchronously write a data structure to the socket.
