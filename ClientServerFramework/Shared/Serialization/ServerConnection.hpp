@@ -20,6 +20,16 @@ namespace io {
 		{
 		}
 
+		/// Server initialization does nothing for this class.
+		virtual void async_initialize(initialize_handler_type const& handler)
+		{
+			using namespace boost::system;
+
+			error_code ec;
+
+			handler(ec);
+		}
+
 		/// asychronous acceptor
 		void async_accept(acceptor_type& acceptor, accept_handler_type const& handler)
 		{

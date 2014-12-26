@@ -21,6 +21,12 @@ namespace io {
 		{
 		}
 
+		/// Server initialization starts with the handshake.
+		virtual void async_initialize(initialize_handler_type const& handler)
+		{
+			async_handshake(handler);
+		}
+
 		/// asynchronous handshake from Server
 		void async_handshake(async_handshake_handler_type const& handler)
 		{

@@ -19,15 +19,8 @@ namespace io {
 		typedef std::function<void(boost::system::error_code const&)> initialize_handler_type;
 		typedef std::function<void(boost::system::error_code const&)> accept_handler_type;
 
-		/// addition server initialization, if any (does nothing by default)
-		virtual void async_initialize(initialize_handler_type const& handler)
-		{
-			using namespace boost::system;
-
-			error_code ec;
-
-			handler(ec);
-		}
+		/// addition server initialization, if any 
+		virtual void async_initialize(initialize_handler_type const& handler) = 0;
 
 		/// asychronous acceptor
 		virtual void async_accept(acceptor_type& acceptor, accept_handler_type const& handler) = 0;
