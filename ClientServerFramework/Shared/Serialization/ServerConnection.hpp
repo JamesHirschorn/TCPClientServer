@@ -27,6 +27,12 @@ namespace io {
 			io().async_initialize(handler);
 		}
 
+		/// asynchronous handshake
+		void async_handshake(async_handshake_handler const& handler)
+		{
+			io().async_handshake(boost::asio::ssl::stream_base::server, handler);
+		}
+
 		/// asychronous acceptor
 		void async_accept(acceptor_type& acceptor, accept_handler const& handler)
 		{

@@ -5,10 +5,8 @@
 #ifndef FRAMEWORK_SERIALIZATION_IO_BASE_HPP
 #define FRAMEWORK_SERIALIZATION_IO_BASE_HPP
 
-#include <ClientServerFramework/Shared/Serialization/UnsecuredIO.hpp>
+//#include <ClientServerFramework/Shared/Serialization/IO_base_fwd.hpp>
 #include <ClientServerFramework/Shared/SSL/SSL.hpp>
-
-//#include <boost/asio/io_service.hpp>
 
 #include <array>
 #include <functional>
@@ -16,9 +14,10 @@
 
 namespace io {
 
-	template<typename InternetProtocol>
-	class IO_base
+	template<typename InternetProtocol, std::size_t header_length = 8>
+	class IO_base 
 	{
+	protected:
 	public:
 		typedef InternetProtocol internet_protocol;
 		typedef typename internet_protocol::resolver resolver_type;
@@ -27,32 +26,12 @@ namespace io {
 		typedef typename internet_protocol::acceptor acceptor_type;
 		typedef std::function<void(boost::system::error_code const&, std::size_t)> async_handler;
 		typedef std::function<void(boost::system::error_code const&)> initialize_handler;
+		typedef std::function<void(boost::system::error_code const&)> async_handshake_handler; 
 		typedef std::function<void(boost::system::error_code const&)> accept_handler;
-		static std::size_t const header_length = 8;
+		static std::size_t const header_length = header_length;
 		typedef std::array<char, header_length> inbound_header_type;
 
-		/// factory method for IO_base_type
-		static IO_base* create(
-			boost::asio::io_service& io_service,
-			io::ssl_options const& SSL_options)
-		{
-			IO_base* io;
-
-			switch (SSL_options.mode)
-			{
-			case OFF:
-				io = new UnsecuredIO<internet_protocol>(io_service);
-				break;
-			case SSLV23:
-			case SSLV3:
-				//conn = new SSLClientConnection<InternetProtocol>(io_service, SSL_options);
-				break;
-			default:
-				throw std::runtime_error("Invalid SSL mode.");
-			}
-
-			return io;
-		}
+		enum side { CLIENT, SERVER };
 
 		/// Connect to the underlying socket (blocking).
 		virtual endpoint_iterator connect(
@@ -62,8 +41,21 @@ namespace io {
 		/// addition server initialization, if any 
 		virtual void async_initialize(initialize_handler const& handler) = 0;
 
+		/// blocking handshake
+		virtual boost::system::error_code handshake(
+			side s,
+			boost::system::error_code& ec) = 0;
+
+		/// asynchronous handshake
+		virtual void async_handshake(
+			side s,
+			async_handshake_handler const& handler) = 0;
+
 		/// asychronous acceptor
 		virtual void async_accept(acceptor_type& acceptor, accept_handler const& handler) = 0;
+
+		/// socket setup
+		virtual void setup_socket(side s) = 0;
 
 		/* Hooks, for the Template Method design pattern where
 		the template methods are the I/O methods in Connection_base. */

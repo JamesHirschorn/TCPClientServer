@@ -1,7 +1,13 @@
-#ifndef FRAMEWORK_SERIALIZATION_UNSECUREDIO_BASE_HPP
-#define FRAMEWORK_SERIALIZATION_UNSECUREDIO_BASE_HPP
+/**
+ *	Concrete strategy for unsecured (i.e. plain out-of-the-box) communications.
+ */
+
+#ifndef FRAMEWORK_SERIALIZATION_UNSECUREDIO_HPP
+#define FRAMEWORK_SERIALIZATION_UNSECUREDIO_HPP
 
 #include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
+
+#include <stdexcept>
 
 namespace io {
 
@@ -38,6 +44,27 @@ namespace io {
 		void async_accept(acceptor_type& acceptor, accept_handler const& handler)
 		{
 			acceptor.async_accept(socket_, handler);
+		}
+
+		/* These two should never be called in this subclass. */
+
+		virtual boost::system::error_code handshake(
+			side s,
+			boost::system::error_code& ec)
+		{
+			throw std::logic_error("Bad call.");
+		}
+		virtual void async_handshake(
+			side s,
+			async_handshake_handler const& handler)
+		{
+			throw std::logic_error("Bad Call.");
+		}
+
+		/// socket setup
+		virtual void setup_socket(side s)
+		{
+			// no setup for this subclass
 		}
 
 		/* implementation of abstract methods */
@@ -90,4 +117,4 @@ namespace io {
 
 }	// namespace IO
 
-#endif // !FRAMEWORK_SERIALIZATION_UNSECUREDIO_BASE_HPP
+#endif // !FRAMEWORK_SERIALIZATION_UNSECUREDIO_HPP
