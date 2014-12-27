@@ -10,9 +10,9 @@
 
 /// Hard-coded settings
 /// Of course, these must be compatible with the server settings.
-io::ssl_mode const SSL_mode = io::SSLV3;
+//io::ssl_mode const SSL_mode = io::SSLV3;
 //io::ssl_mode const SSL_mode = io::SSLV23;	// (see SSL.hpp)
-//io::ssl_mode const SSL_mode = io::OFF;		// (no SSL, see SSL.hpp)
+io::ssl_mode const SSL_mode = io::OFF;		// (no SSL, see SSL.hpp)
 long const context_options = boost::asio::ssl::context::default_workarounds;
 boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_peer;
 std::string const install_dir = INSTALL_DIRECTORY;

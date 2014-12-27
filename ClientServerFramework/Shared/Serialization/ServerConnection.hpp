@@ -1,86 +1,36 @@
-#include <ClientServerFramework/Shared/Serialization/ServerConnection_base.hpp>
+/** Server connection. */
 
-#include <boost/asio/io_service.hpp>
-
-#include <memory>
+#include <ClientServerFramework/Shared/Serialization/UnsecuredIO.hpp>
+#include <ClientServerFramework/Shared/Serialization/Connection_base.hpp>
 
 namespace io {
 
 	template<typename InternetProtocol>
 	class ServerConnection : 
-		public ServerConnection_base<InternetProtocol>
+		public Connection_base<InternetProtocol>
 	{
 	public:
-		/// Concrete component in the decorator pattern.
-		typedef Connection<internet_protocol> concrete_component_type;
-		typedef std::shared_ptr<concrete_component_type> connection_pointer;
+		typedef typename IO_base_type::acceptor_type acceptor_type;
+		typedef typename IO_base_type::initialize_handler initialize_handler;
+		typedef typename IO_base_type::accept_handler accept_handler;
 
-		ServerConnection(concrete_component_type* connection)
-			: connection_(connection)
+		ServerConnection(
+			boost::asio::io_service& io_service,
+			ssl_options const& SSL_options) :
+			Connection_base<internet_protocol>(
+				IO_base_type::create(io_service, SSL_options))
+		{}
+
+		/// addition server initialization, if any 
+		void async_initialize(initialize_handler const& handler)
 		{
-		}
-
-		/// Server initialization does nothing for this class.
-		virtual void async_initialize(initialize_handler_type const& handler)
-		{
-			using namespace boost::system;
-
-			error_code ec;
-
-			handler(ec);
+			io().async_initialize(handler);
 		}
 
 		/// asychronous acceptor
-		void async_accept(acceptor_type& acceptor, accept_handler_type const& handler)
+		void async_accept(acceptor_type& acceptor, accept_handler const& handler)
 		{
-			acceptor.async_accept(connection_->socket(), handler);
-		}
-	private:
-		/// as in the decorator pattern
-		connection_pointer connection_;
-
-		/* implementation of abstract methods */
-
-		void async_write_impl(
-			std::vector<boost::asio::const_buffer> const& buffers,
-			async_handler_type const& handler)
-		{
-			connection_->async_write_impl(buffers, handler);
-		}
-
-		void async_read_impl(
-			input_header_type& input,
-			async_handler_type const& handler)
-		{
-			connection_->async_read_impl(input, handler);
-		}
-
-		void async_read_impl(
-			std::vector<char>& input,
-			async_handler_type const& handler)
-		{
-			connection_->async_read_impl(input, handler);
-		}
-
-		std::size_t write_impl(
-			std::vector<boost::asio::const_buffer> const& buffers,
-			boost::system::error_code& ec)
-		{
-			return connection_->write_impl(buffers, ec);
-		}
-
-		std::size_t read_impl(
-			input_header_type& input,
-			boost::system::error_code& ec)
-		{
-			return connection_->read_impl(input, ec);
-		}
-
-		std::size_t read_impl(
-			std::vector<char>& b,
-			boost::system::error_code& ec)
-		{
-			return connection_->read_impl(b, ec);
+			io().async_accept(acceptor, handler);
 		}
 	};
 

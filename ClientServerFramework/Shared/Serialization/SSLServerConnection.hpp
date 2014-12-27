@@ -59,21 +59,21 @@ namespace io {
 
 		void async_write_impl(
 			std::vector<boost::asio::const_buffer> const& buffers,
-			async_handler_type const& handler)
+			async_handler const& handler)
 		{
 			connection_->async_write_impl(buffers, handler);
 		}
 
 		void async_read_impl(
 			input_header_type& input,
-			async_handler_type const& handler)
+			async_handler const& handler)
 		{
 			connection_->async_read_impl(input, handler);
 		}
 
 		void async_read_impl(
 			std::vector<char>& input,
-			async_handler_type const& handler)
+			async_handler const& handler)
 		{
 			connection_->async_read_impl(input, handler);
 		}

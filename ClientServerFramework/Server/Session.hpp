@@ -12,10 +12,7 @@
 #define FRAMEWORK_SERVER_SESSION_HPP
 
 #include <ClientServerFramework/Server/Response.hpp>
-#include <ClientServerFramework/Shared/Serialization/Connection.hpp>
 #include <ClientServerFramework/Shared/Serialization/ServerConnection.hpp>
-#include <ClientServerFramework/Shared/Serialization/SSLConnection.hpp>
-#include <ClientServerFramework/Shared/Serialization/SSLServerConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
 
@@ -38,10 +35,10 @@ namespace Server {
 	{
 	public:
 		typedef std::shared_ptr<Session> pointer_type;
-		typedef Strategy strategy_type;
-		typedef InternetProtocol internet_protocol;
-		typedef io::ServerConnection_base<internet_protocol> connection_type;
+		typedef io::ServerConnection<InternetProtocol> connection_type;
 		typedef std::shared_ptr<connection_type> connection_pointer_type;
+		typedef typename connection_type::internet_protocol internet_protocol;
+		typedef Strategy strategy_type;
 
 		/// factory method (only way to create new Session`s).
 		static pointer_type create(
@@ -85,7 +82,7 @@ namespace Server {
 			boost::asio::io_service& io_service, short port, 
 			io::ssl_options const& SSL_options,
 			strategy_type const& strategy) :
-			connection_(get_connection(io_service, SSL_options)), 
+			connection_(new connection_type(io_service, SSL_options)), 
 			strategy_(strategy)
 		{
 			session_id_ = count++;
@@ -170,32 +167,6 @@ namespace Server {
 		ClientData cdata_;
 		Response<ServerData> response_;
 		std::size_t session_id_;
-
-		/// factory method
-		connection_type* get_connection(
-			boost::asio::io_service& io_service,
-			io::ssl_options const& SSL_options)
-		{
-			using namespace io;
-			using namespace boost::asio::ssl;
-
-			connection_type* conn;
-
-			switch (SSL_options.mode)
-			{
-			case OFF:
-				conn = new ServerConnection<InternetProtocol>(new Connection<InternetProtocol>(io_service));
-				break;
-			case SSLV23:
-			case SSLV3:
-				conn = new SSLServerConnection<InternetProtocol>(new SSLConnection<InternetProtocol>(io_service, SSL_options));
-				break;
-			default:
-				throw std::runtime_error("Invalid SSL mode.");
-			}
-
-			return conn;
-		}
 	};
 
 	template<typename InternetProtocol, typename Strategy, typename ClientData, typename ServerData>

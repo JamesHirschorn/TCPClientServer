@@ -45,7 +45,7 @@ namespace Server {
 			// Set the connection to accept incoming client connections.
 			// uses a lambda expression for the accept handler
 			new_session->connection()->async_accept(acceptor_, 
-				[this,new_session,port,SSL_options](boost::system::error_code const& ec)
+				[this, new_session, port, SSL_options](boost::system::error_code const& ec)
 			{
 				if (!ec)
 				{

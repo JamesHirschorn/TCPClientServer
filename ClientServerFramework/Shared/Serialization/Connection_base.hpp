@@ -1,12 +1,13 @@
 /**
- * Add serialization capabilities to a socket.
- * This can only be used as a base class.
+ * Adds serialization capabilities to a socket.
+ *
+ * This only for use as a base class.
  * Based on the boost::asio serialization example "Connection.hpp".
  *
  * 1. Added synchronzied read and write to Connection.hpp.
  * 2. Major clean up, so that now async_read and async_write work with lambdas.
- * 3. Made the Connection_base class polymorphic so that we can also serialize
- *	  encrypted/compressed socket connections.
+ * 3. Incorporated the polymorphic Strategy Pattern so that we can also, for 
+ *	  example, serialize encrypted/compressed socket connections.
  *
  * (C) James Hirschorn 2014
  */
@@ -24,6 +25,8 @@
 #ifndef FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
 #define FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
 
+#include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
+
 #include <boost/asio/connect.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
@@ -35,7 +38,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <iomanip>
-#include <functional>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -53,28 +56,28 @@ namespace io {
 	template<typename InternetProtocol>
 	class Connection_base
 	{
-		/// The size of the fixed length header.
-		enum { header_length = 8 };
+	protected:
+		static std::size_t const header_length = IO_base<InternetProtocol>::header_length;
 	public:
 		typedef InternetProtocol internet_protocol;
-		typedef typename internet_protocol::resolver resolver_type;
-		typedef typename resolver_type::iterator endpoint_iterator_type;
-		typedef std::function<void(boost::system::error_code const&, std::size_t)> async_handler_type;
+		typedef IO_base<InternetProtocol> IO_base_type;
+		typedef typename IO_base_type::resolver_type resolver_type;
+		typedef typename IO_base_type::query_type query_type;
+		typedef typename IO_base_type::endpoint_iterator endpoint_iterator;
+		typedef typename IO_base_type::acceptor_type acceptor_type;
+		typedef typename IO_base_type::async_handler async_handler;
 
-		/// Connect to the underlying socket (blocking).
-		virtual endpoint_iterator_type connect(
-			endpoint_iterator_type begin,
-			boost::system::error_code& ec)
-		{
-			// Not used by the server in our design.
-			throw std::runtime_error("connect not implemented.");
-		};
+		/// ctor. The socket IO strategy and serialization strategy are both
+		/// specified here.
+		Connection_base(IO_base_type* io) : 
+			io_(io)	
+		{}
 
 		/// Asynchronously write a data structure to the socket.
 		template <typename T>
 		void async_write(
 			T const& t, 
-			async_handler_type const& handler)
+			async_handler const& handler)
 		{
 			// Serialize the data first so we know how large it is.
 			std::ostringstream archive_stream;
@@ -101,7 +104,7 @@ namespace io {
 			std::vector<boost::asio::const_buffer> buffers;
 			buffers.push_back(boost::asio::buffer(outbound_header_));
 			buffers.push_back(boost::asio::buffer(outbound_data_));
-			async_write_impl(buffers, handler);
+			io_->async_write_impl(buffers, handler);
 		}
 
 		/// Synchronized write. 
@@ -134,14 +137,14 @@ namespace io {
 			buffers.push_back(boost::asio::buffer(outbound_header_));
 			buffers.push_back(boost::asio::buffer(outbound_data_));
 
-			return write_impl(buffers, ec);
+			return io_->write_impl(buffers, ec);
 		}
 
 		/// Asynchronously read a data structure from the socket.
 		template <typename T>
-		void async_read(T& t, async_handler_type const& handler)
+		void async_read(T& t, async_handler const& handler)
 		{
-			async_read_impl(inbound_header_, 
+			io_->async_read_impl(inbound_header_, 
 				[this,&t,handler](boost::system::error_code const& ec, std::size_t len)
 			{
 				handle_read_header(ec, len, t, handler);
@@ -158,7 +161,7 @@ namespace io {
 
 			std::size_t length;
 
-			length = read_impl(inbound_header_, ec);
+			length = io_->read_impl(inbound_header_, ec);
 
 			if (ec) 
 				return length;	// an error occurred.
@@ -167,9 +170,8 @@ namespace io {
 			if (!handle_determine_data_size(inbound_data_size, length, nullptr))
 				return 0;
 
-
 			inbound_data_.resize(inbound_data_size);
-			length += read_impl(inbound_data_, ec);
+			length += io_->read_impl(inbound_data_, ec);
 
 			// Extract the data structure from the data just received.
 			try
@@ -193,8 +195,17 @@ namespace io {
 		virtual ~Connection_base() 
 		{}
 	protected:
-		typedef std::array<char, header_length> input_header_type;
+		/// io inspector
+		IO_base_type& io()
+		{
+			return *io_;
+		}
 	private:
+		typedef typename IO_base_type::inbound_header_type inbound_header_type;
+
+		/// Socket IO strategy.
+		std::shared_ptr<IO_base_type> io_;
+
 		/// Holds an outbound header.
 		std::string outbound_header_;
 
@@ -202,7 +213,7 @@ namespace io {
 		std::string outbound_data_;
 
 		/// Holds an inbound header.
-		input_header_type inbound_header_; 
+		inbound_header_type inbound_header_; 
 
 		/// Holds the inbound data.
 		std::vector<char> inbound_data_;
@@ -212,7 +223,7 @@ namespace io {
 		/// Handle a completed read of a message header. 
 		template <typename T>
 		void handle_read_header(boost::system::error_code const& e, std::size_t len,
-			T& t, async_handler_type const& handler)
+			T& t, async_handler const& handler)
 		{
 			if (e)
 			{
@@ -227,7 +238,7 @@ namespace io {
 
 				// Start an asynchronous call to receive the data.
 				inbound_data_.resize(inbound_data_size);
-				async_read_impl(inbound_data_,
+				io_->async_read_impl(inbound_data_,
 					[this, &t, len, handler](boost::system::error_code const& ec, std::size_t next_len)
 				{
 					handle_read_data(ec, len + next_len, t, handler);
@@ -239,7 +250,7 @@ namespace io {
 		bool handle_determine_data_size(
 			std::size_t& inbound_data_size,
 			std::size_t len,
-			async_handler_type handler)
+			async_handler handler)
 		{
 			std::string header_copy; header_copy.resize(header_length);
 			std::copy(inbound_header_.begin(), inbound_header_.end(), header_copy.begin());
@@ -258,7 +269,7 @@ namespace io {
 		/// Handle a completed read of message data.
 		template <typename T>
 		void handle_read_data(const boost::system::error_code& ec, std::size_t len,
-			T& t, async_handler_type const& handler)
+			T& t, async_handler const& handler)
 		{
 			if (ec)
 			{
@@ -283,33 +294,6 @@ namespace io {
 				handler(ec, len);
 			}
 		}
-
-		/* Hooks, for the Template Method design pattern where 
-		   the template methods are the I/O methods in the interface. */
-
-		virtual void async_write_impl(
-			std::vector<boost::asio::const_buffer> const&, 
-			async_handler_type const&) = 0;
-
-		virtual void async_read_impl(
-			input_header_type&,
-			async_handler_type const&) = 0;
-
-		virtual void async_read_impl(
-			std::vector<char>&,
-			async_handler_type const&) = 0;
-
-		virtual std::size_t write_impl(
-			std::vector<boost::asio::const_buffer> const& buffers,
-			boost::system::error_code& ec) = 0;
-
-		virtual std::size_t read_impl(
-			input_header_type&,
-			boost::system::error_code& ec) = 0;
-
-		virtual std::size_t read_impl(
-			std::vector<char>& b,
-			boost::system::error_code& ec) = 0;
 	};
 
 }	// namespace io

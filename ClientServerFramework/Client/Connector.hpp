@@ -13,7 +13,6 @@
 
 #include <ClientServerFramework/Server/Response.hpp>
 #include <ClientServerFramework/Shared/Serialization/ClientConnection.hpp>
-#include <ClientServerFramework/Shared/Serialization/SSLClientConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
 
@@ -43,14 +42,14 @@ namespace Client
 		{
 			// Resolve the query to a list of end-points.
 			// The end-points may contain both IPv4 and IPv6 end-points.
-			endpoint_iterator_type endpoints = resolver_.resolve(query_);
+			endpoint_iterator endpoints = resolver_.resolve(query_);
 
 			// Attempts to connect to each of the end-points until successful, 
 			// or until all end-points have been tried.
 			auto point = connection_->connect(endpoints, ec);
 
 			// If successful, point will reference a valid end-point.
-			return point != endpoint_iterator_type();
+			return point != endpoint_iterator();
 		}
 
 		/// opens a connection to the server asynchronously
@@ -58,17 +57,6 @@ namespace Client
 		/*template<typename Handler>
 		void async_open(Handler const& handler)
 		{
-			// Resolve the query to a list of end-points.
-			// The end-points may contain both IPv4 and IPv6 end-points.
-			endpoint_iterator_type endpoints = resolver_.resolve(query_);
-
-			// Attempts to connect to each of the end-points until successful, 
-			// or until all end-points have been tried.
-			boost::asio::async_connect(socket_, endpoints, 
-				[](boost::system::error_code const& ec, endpoint_iterator_type iter)
-			{
-				handler(ec, iter);
-			});
 		}*/
 
 		/// Sends one time of data to the server
@@ -98,44 +86,20 @@ namespace Client
 			boost::asio::io_service& io_service, 
 			io::ssl_options const& SSL_options,
 			std::string const& host, std::string const& service) :
-			connection_(get_connection(io_service, SSL_options)),
+			connection_(new connection_type(io_service, SSL_options)), 
 			resolver_(io_service),
 			query_(host, service)
 		{}
 	private:
-		typedef io::Connection_base<InternetProtocol> connection_type;
-		typedef typename InternetProtocol::resolver resolver_type;
-		typedef typename resolver_type::query query_type;
-		typedef typename resolver_type::iterator endpoint_iterator_type;
+		typedef io::ClientConnection<InternetProtocol> connection_type;
+		typedef typename connection_type::resolver_type resolver_type;
+		typedef typename connection_type::query_type query_type;
+		typedef typename connection_type::endpoint_iterator endpoint_iterator;
 
 		/// The (serialized) connection to the server.
 		std::shared_ptr<connection_type> connection_;
 		resolver_type resolver_;
 		query_type query_;
-
-		connection_type* get_connection(
-			boost::asio::io_service& io_service, 
-			io::ssl_options const& SSL_options)
-		{
-			using namespace io;
-
-			connection_type* conn;
-
-			switch (SSL_options.mode)
-			{
-			case OFF:
-				conn = new ClientConnection<InternetProtocol>(io_service);
-				break;
-			case SSLV23:
-			case SSLV3:
-				conn = new SSLClientConnection<InternetProtocol>(io_service, SSL_options);
-				break;
-			default:
-				throw std::runtime_error("Invalid SSL mode.");
-			}
-
-			return conn;
-		}
 	};
 }	// namespace Client
 
