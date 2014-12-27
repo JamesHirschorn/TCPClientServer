@@ -36,7 +36,7 @@ namespace io {
 		{
 		}
 
-		endpoint_iterator_type connect(
+	/*	endpoint_iterator_type connect(
 			endpoint_iterator_type begin,
 			boost::system::error_code& ec)
 		{
@@ -54,7 +54,7 @@ namespace io {
 				}
 			}
 			return endpoint;
-		}
+		}*/
 
 		/// blocking handshake
 		virtual boost::system::error_code handshake(boost::system::error_code& ec)
@@ -104,21 +104,21 @@ namespace io {
 
 		void async_write_impl(
 			std::vector<boost::asio::const_buffer> const& buffers,
-			async_handler_type const& handler)
+			async_handler const& handler)
 		{
 			boost::asio::async_write(socket(), buffers, handler);
 		}
 
 		void async_read_impl(
-			input_header_type& input,
-			async_handler_type const& handler)
+			inbound_header_type& input,
+			async_handler const& handler)
 		{
 			boost::asio::async_read(socket(), boost::asio::buffer(input), handler);
 		}
 
 		void async_read_impl(
 			std::vector<char>& input,
-			async_handler_type const& handler)
+			async_handler const& handler)
 		{
 			boost::asio::async_read(socket(), boost::asio::buffer(input), handler);
 		}
