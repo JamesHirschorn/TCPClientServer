@@ -7,9 +7,10 @@ namespace io {
 	template<typename InternetProtocol>
 	class IO_base_factory
 	{
+	public:
 		typedef IO_base<InternetProtocol> IO_base_type;
 		typedef typename IO_base_type::internet_protocol internet_protocol;
-	public:
+
 		static IO_base_type* create(
 			boost::asio::io_service& io_service,
 			io::ssl_options const& SSL_options,

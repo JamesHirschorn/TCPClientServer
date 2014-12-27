@@ -142,12 +142,6 @@ namespace Client {
 					std::size_t sent_length, received_length;	// # of bytes sent/received
 					auto response = connector_.send(data, ec, sent_length, received_length);
 
-					std::clog << sent_length << " bytes sent." << std::endl;
-					std::clog << received_length << " bytes received." << std::endl;
-
-					// Perform the response part of the strategy.
-					strategy_.response(response);
-
 					// error handling
 					switch (ec.value())
 					{
@@ -157,9 +151,18 @@ namespace Client {
 						// also check the status
 						connection_ok &= response.transmission_status == Server::OK;
 
-						// If everything is OK then pop the data from the queue.
+						// If everything is OK then handle the response, 
+						// and then pop the data from the queue.
 						if (connection_ok)
+						{
+							std::clog << sent_length << " bytes sent." << std::endl;
+							std::clog << received_length << " bytes received." << std::endl;
+
+							// Perform the response part of the strategy.
+							strategy_.response(response);
+
 							queue.pop();
+						}
 						break;
 					case connection_aborted:
 					case connection_reset:

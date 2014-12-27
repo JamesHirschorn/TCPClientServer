@@ -2,7 +2,6 @@
 
 #include <ClientServerFramework/Shared/Serialization/UnsecuredIO.hpp>
 #include <ClientServerFramework/Shared/Serialization/Connection_base.hpp>
-#include <ClientServerFramework/Shared/Serialization/IO_base_factory.hpp>
 
 namespace io {
 
@@ -22,7 +21,7 @@ namespace io {
 			endpoint_iterator begin,
 			boost::system::error_code& ec)
 		{
-			return io().connect(begin, ec);
+			return io().connect(begin, IO_base_type::CLIENT, ec);
 		}		
 
 		/// blocking handshake

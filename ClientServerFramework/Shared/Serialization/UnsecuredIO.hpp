@@ -25,9 +25,10 @@ namespace io {
 		/// Connect to the underlying socket (blocking).
 		endpoint_iterator connect(
 			endpoint_iterator begin,
+			side s,
 			boost::system::error_code& ec)
 		{
-			return boost::asio::connect(socket_, begin);
+			return boost::asio::connect(socket_, begin, ec);
 		}
 
 		/// Server initialization does nothing for this strategy.

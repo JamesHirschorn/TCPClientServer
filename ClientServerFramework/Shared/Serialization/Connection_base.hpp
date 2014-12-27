@@ -26,6 +26,7 @@
 #define FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
 
 #include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
+#include <ClientServerFramework/Shared/Serialization/IO_base_factory.hpp>
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/read.hpp>
@@ -57,10 +58,12 @@ namespace io {
 	class Connection_base
 	{
 	protected:
-		static std::size_t const header_length = IO_base<InternetProtocol>::header_length;
+		static std::size_t const header_length = 
+			IO_base_factory<InternetProtocol>::IO_base_type::header_length;
 	public:
 		typedef InternetProtocol internet_protocol;
-		typedef IO_base<InternetProtocol> IO_base_type;
+		typedef typename IO_base_factory<internet_protocol>::IO_base_type IO_base_type;
+		typedef std::shared_ptr<IO_base_type> IO_base_pointer;
 		typedef typename IO_base_type::resolver_type resolver_type;
 		typedef typename IO_base_type::query_type query_type;
 		typedef typename IO_base_type::endpoint_iterator endpoint_iterator;
@@ -204,7 +207,7 @@ namespace io {
 		typedef typename IO_base_type::inbound_header_type inbound_header_type;
 
 		/// Socket IO strategy.
-		std::shared_ptr<IO_base_type> io_;
+		IO_base_pointer io_;
 
 		/// Holds an outbound header.
 		std::string outbound_header_;

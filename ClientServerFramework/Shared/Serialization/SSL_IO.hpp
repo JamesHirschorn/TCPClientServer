@@ -11,6 +11,7 @@
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
 
+#include <iostream>
 #include <utility>
 
 namespace io {
@@ -19,15 +20,9 @@ namespace io {
 	class SSL_IO : public
 		IO_base<InternetProtocol> 
 	{
-		//typedef IO_base<InternetProtocol> IO_base_type;
-		//typedef typename IO_base_type::internet_protocol internet_protocol;
-		//define_type(internet_protocol);
 		typedef boost::asio::ssl::stream<typename internet_protocol::socket> socket_type;
 		typedef typename socket_type::lowest_layer_type lowest_layer_type;
 		typedef boost::asio::ssl::context context_type;
-		///define_type(side);
-		//define_type(endpoint_iterator);
-		//typedef typename IO_base_type::side side;
 	public:
 		/// ctor
 		SSL_IO(
@@ -44,9 +39,23 @@ namespace io {
 		/// Connect to the underlying socket (blocking).
 		endpoint_iterator connect(
 			endpoint_iterator begin,
+			side s,
 			boost::system::error_code& ec)
 		{
-			return boost::asio::connect(socket_.lowest_layer(), begin);
+			auto endpoint = boost::asio::connect(socket_.lowest_layer(), begin, ec);
+			if (!ec)
+			{
+				// Perform SSL handshake immediately after openning the connection.
+				handshake(s, ec);
+				if (ec)
+				{
+					std::cerr << "SSL Handshake failed with error message: " << ec.message() << std::endl;
+
+					throw ec;
+				}
+			}
+
+			return endpoint;
 		}
 
 		/// Server initialization starts with the handshake.

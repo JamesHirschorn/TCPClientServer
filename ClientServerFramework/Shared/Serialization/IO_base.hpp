@@ -36,6 +36,7 @@ namespace io {
 		/// Connect to the underlying socket (blocking).
 		virtual endpoint_iterator connect(
 			endpoint_iterator begin,
+			side s,
 			boost::system::error_code& ec) = 0;
 
 		/// addition server initialization, if any 

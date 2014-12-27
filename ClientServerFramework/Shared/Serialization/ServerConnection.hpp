@@ -11,14 +11,15 @@ namespace io {
 	{
 	public:
 		typedef typename IO_base_type::acceptor_type acceptor_type;
-		typedef typename IO_base_type::initialize_handler initialize_handler;
 		typedef typename IO_base_type::accept_handler accept_handler;
+		typedef typename IO_base_type::initialize_handler initialize_handler;
+		typedef typename IO_base_type::async_handshake_handler async_handshake_handler;
 
 		ServerConnection(
 			boost::asio::io_service& io_service,
 			ssl_options const& SSL_options) :
 			Connection_base<internet_protocol>(
-				IO_base_type::create(io_service, SSL_options))
+				IO_base_factory<internet_protocol>::create(io_service, SSL_options, IO_base_type::SERVER))
 		{}
 
 		/// addition server initialization, if any 
