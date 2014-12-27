@@ -28,9 +28,11 @@ namespace io {
 		}
 
 		/// asynchronous handshake from Server
-		void async_handshake(async_handshake_handler_type const& handler)
+		void async_handshake(
+			boost::asio::ssl::stream_base::handshake_type ht,
+			async_handshake_handler_type const& handler)
 		{
-			connection_->socket().async_handshake(boost::asio::ssl::stream_base::server, handler); 
+			socket_.async_handshake(ht, handler); 
 		}
 
 		/// asnychronous accept
