@@ -48,6 +48,7 @@ struct ServerAction
 		result.timestamp = timestamp;
 		result.id = d.id;
 		result.result = answer;
+		result.padding = d.padding;
 
 		return result;
 	}

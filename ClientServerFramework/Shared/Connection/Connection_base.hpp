@@ -22,11 +22,12 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
-#define FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
+#ifndef FRAMEWORK_SHARED_CONNECTION_CONNECTION_BASE_HPP
+#define FRAMEWORK_SHARED_CONNECTION_CONNECTION_BASE_HPP
 
-#include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
-#include <ClientServerFramework/Shared/Serialization/IO_base_factory.hpp>
+#include <ClientServerFramework/Shared/IO/IO_base.hpp>
+#include <ClientServerFramework/Shared/IO/IO_base_factory.hpp>
+#include <ClientServerFramework/Shared/IO/Filter_base.hpp>
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/read.hpp>
@@ -42,6 +43,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 namespace io {
@@ -69,11 +71,12 @@ namespace io {
 		typedef typename IO_base_type::endpoint_iterator endpoint_iterator;
 		typedef typename IO_base_type::acceptor_type acceptor_type;
 		typedef typename IO_base_type::async_handler async_handler;
+		typedef std::shared_ptr<Filter_base> Filter_base_pointer;
 
 		/// ctor. The socket IO strategy and serialization strategy are both
 		/// specified here.
-		Connection_base(IO_base_type* io) : 
-			io_(io)	
+		Connection_base(IO_base_type* io, Filter_base* filter) : 
+			io_(io), filter_(filter)
 		{}
 
 		/// Asynchronously write a data structure to the socket.
@@ -86,7 +89,10 @@ namespace io {
 			std::ostringstream archive_stream;
 			boost::archive::text_oarchive archive(archive_stream);
 			archive << t;
-			outbound_data_ = archive_stream.str();
+			std::string outbound = archive_stream.str();
+
+			// filter the data in preparation for output (e.g. compress it)
+			filter_->output_filter(outbound, outbound_data_);
 
 			// Format the header.
 			std::ostringstream header_stream;
@@ -119,7 +125,9 @@ namespace io {
 			std::ostringstream archive_stream;
 			boost::archive::text_oarchive archive(archive_stream);
 			archive << t;
-			outbound_data_ = archive_stream.str();
+			std::string outbound = archive_stream.str();
+
+			filter_->output_filter(outbound, outbound_data_);
 
 			// Format the header.
 			std::ostringstream header_stream;
@@ -137,7 +145,7 @@ namespace io {
 			// Write the serialized data to the socket. We use "gather-write" to send
 			// both the header and the data in a single write operation.
 			std::vector<boost::asio::const_buffer> buffers;
-			buffers.push_back(boost::asio::buffer(outbound_header_));
+			buffers.push_back(boost::asio::buffer(outbound_header_)); 
 			buffers.push_back(boost::asio::buffer(outbound_data_));
 
 			return io_->write_impl(buffers, ec);
@@ -176,11 +184,14 @@ namespace io {
 			inbound_data_.resize(inbound_data_size);
 			length += io_->read_impl(inbound_data_, ec);
 
+			// filter the data received (e.g. decompress it)
+			std::string inbound;
+			filter_->input_filter(inbound_data_, inbound);
+
 			// Extract the data structure from the data just received.
 			try
 			{
-				std::string archive_data(&inbound_data_[0], inbound_data_.size());
-				std::istringstream archive_stream(archive_data);
+				std::istringstream archive_stream(inbound);
 				boost::archive::text_iarchive archive(archive_stream);
 				archive >> t;
 			}
@@ -208,6 +219,9 @@ namespace io {
 
 		/// Socket IO strategy.
 		IO_base_pointer io_;
+
+		/// IO filter strategy.
+		Filter_base_pointer filter_;
 
 		/// Holds an outbound header.
 		std::string outbound_header_;
@@ -240,7 +254,7 @@ namespace io {
 					return;	// problem
 
 				// Start an asynchronous call to receive the data.
-				inbound_data_.resize(inbound_data_size);
+				inbound_data_.resize(inbound_data_size); 
 				io_->async_read_impl(inbound_data_,
 					[this, &t, len, handler](boost::system::error_code const& ec, std::size_t next_len)
 				{
@@ -280,11 +294,13 @@ namespace io {
 			}
 			else
 			{
+				std::string inbound;
+				filter_->input_filter(inbound_data_, inbound);
+				
 				// Extract the data structure from the data just received.
 				try
 				{
-					std::string archive_data(&inbound_data_[0], inbound_data_.size());
-					std::istringstream archive_stream(archive_data);
+					std::istringstream archive_stream(inbound);
 					boost::archive::text_iarchive archive(archive_stream);
 					archive >> t;
 				}
@@ -301,4 +317,4 @@ namespace io {
 
 }	// namespace io
 
-#endif // !FRAMEWORK_SERIALIZATION_CONNECTION_BASE_HPP
+#endif // !FRAMEWORK_SHARED_CONNECTION_CONNECTION_BASE_HPP

@@ -28,7 +28,7 @@
 
 #include <ClientServerFramework/Server/Response.hpp>
 #include <ClientServerFramework/Shared/DesignPatterns/Singleton.hpp>
-#include <ClientServerFramework/Shared/SSL/SSL.hpp>
+#include <ClientServerFramework/Shared/IO/SSL.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/system/error_code.hpp>
@@ -56,13 +56,14 @@ namespace Client {
 		static pointer_type create(
 			boost::asio::io_service& io_service, 
 			io::ssl_options const& SSL_options,
+			bool compression,
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
 			std::istream& is, bool keep_alive, 
 			Strategy const& strategy)
 		{
 			return pointer_type(
-				new Client(io_service, SSL_options, 
+				new Client(io_service, SSL_options, compression,
 					client_id, host, service, is, keep_alive, strategy));
 		}
 
@@ -104,11 +105,12 @@ namespace Client {
 		Client(
 			boost::asio::io_service& io_service,
 			io::ssl_options const& SSL_options,
+			bool compression,
 			std::string const& client_id,
 			std::string const& host, std::string const& service,
 			std::istream& is, bool keep_alive,
 			Strategy const& strategy) :
-			connector_(io_service, SSL_options, host, service),
+			connector_(io_service, SSL_options, compression, host, service),
 			scraper_(is, client_id),
 			keep_alive_(keep_alive),
 			strategy_(strategy)

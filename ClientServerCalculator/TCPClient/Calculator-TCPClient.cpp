@@ -18,6 +18,7 @@ boost::asio::ssl::verify_mode const ssl_verify_mode = boost::asio::ssl::verify_p
 std::string const install_dir = INSTALL_DIRECTORY;
 std::string const ssl_subdir = "ssl";	// where to look for certificates
 std::string const ca_filename = "ca_cert.pem";
+bool use_compression = true;
 
 int main(int argc, char* argv[])
 {
@@ -79,12 +80,12 @@ int main(int argc, char* argv[])
 		// Create the internal client, using either cin or the given file as the input stream, 
 		// and start it up.
 		if (filename.empty())
-			client_type::create(io_service, SSL_options, client_id, host, service, cin, true, strategy)->start();
+			client_type::create(io_service, SSL_options, use_compression, client_id, host, service, cin, true, strategy)->start();
 		else
 		{
 			ifstream is(filename);
 			if (is)
-				client_type::create(io_service, SSL_options, client_id, host, service, is, false, strategy)->start();
+				client_type::create(io_service, SSL_options, use_compression, client_id, host, service, is, false, strategy)->start();
 			else
 				throw std::runtime_error("Unable to open input file.");
 		}

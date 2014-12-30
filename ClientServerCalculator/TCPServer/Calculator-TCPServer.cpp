@@ -22,6 +22,7 @@ std::string const ca_filename = "ca_cert.pem";
 std::string const private_key_filename = "ssl_priv.pem";
 std::string const password = "password";
 std::string const temporary_DH_filename = "dh1024.pem";
+bool use_compression = true;
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +65,7 @@ int main(int argc, char* argv[])
 		short port = std::atoi(argv[1]);
 		Strategy strategy;
 
-		server_type server(io_service, port, SSL_options, strategy);
+		server_type server(io_service, port, SSL_options, use_compression, strategy);
 
 		// Start up the server.
 		io_service.run();

@@ -24,6 +24,9 @@ struct ClientActions
 				<< ". Request: " << std::setprecision(15)
 				<< d.operand1 << ' ' << d.operation << ' ' << d.operand2 << '.' 
 				<< endl << endl;
+
+			// keep track of last padding
+			padding = d.padding;
 		}
 	} request;
 
@@ -39,6 +42,14 @@ struct ClientActions
 				<< "Result: " << std::setprecision(15) 
 				<< r.data.result << ", computed at " << r.data.timestamp << '.'
 				<< endl << endl;
+
+			// Verify that the padding remains unchanged.
+			assert(r.data.padding == padding); 
 		}
 	} response;
+private:
+	static std::array<char, client_data::padding_size> padding;
 };
+
+template<typename ClientData, typename Response>
+std::array<char, client_data::padding_size> ClientActions<typename ClientData, typename Response>::padding;

@@ -12,7 +12,7 @@
 #define FRAMEWORK_CLIENT_CONNECTOR_HPP
 
 #include <ClientServerFramework/Server/Response.hpp>
-#include <ClientServerFramework/Shared/Serialization/ClientConnection.hpp>
+#include <ClientServerFramework/Shared/Connection/ClientConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
 
@@ -84,9 +84,9 @@ namespace Client
 	protected:
 		Connector(
 			boost::asio::io_service& io_service, 
-			io::ssl_options const& SSL_options,
+			io::ssl_options const& SSL_options, bool compression,
 			std::string const& host, std::string const& service) :
-			connection_(new connection_type(io_service, SSL_options)), 
+			connection_(new connection_type(io_service, SSL_options, compression)), 
 			resolver_(io_service),
 			query_(host, service)
 		{}

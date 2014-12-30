@@ -16,6 +16,7 @@
 #include <ClientServerCalculator/TCPClient/client_data.hpp>
 #include <ClientServerCalculator/TCPClient/client_data.cpp>	// include external definitions
 
+#include <array>
 #include <cstdint>
 #include <iostream>
 #include <random>
@@ -55,13 +56,21 @@ int main(int argc, char *argv[])
 
 	normal_distribution<> operand_dist(0, sigma);
 
+	// Padding consists of the following string repeated.
+	string word = "The padding...";
+	array<char, client_data::padding_size> padding;
+	for (size_t i = 0; i < client_data::padding_size; ++i)
+	{
+		padding[i] = word[i % word.size()];
+	}
+
 	for (int request_id = 1; request_id <= data_size; ++request_id)
 	{
 		auto operation = static_cast<client_data::operation_enum>(operation_dist(random_engine));
 		auto operand1 = operand_dist(random_engine);
 		auto operand2 = operand_dist(random_engine);
 
-		client_data datum = { "", request_id, operand1, operation, operand2 };
+		client_data datum = { "", request_id, operand1, operation, operand2, padding };
 
 		cout << datum << endl;
 	}

@@ -2,11 +2,10 @@
  *	Interface for the Stategy pattern for socket IO.
  */
 
-#ifndef FRAMEWORK_SERIALIZATION_IO_BASE_HPP
-#define FRAMEWORK_SERIALIZATION_IO_BASE_HPP
+#ifndef FRAMEWORK_SHARED_IO_IO_BASE_HPP
+#define FRAMEWORK_SHARED_IO_IO_BASE_HPP
 
-//#include <ClientServerFramework/Shared/Serialization/IO_base_fwd.hpp>
-#include <ClientServerFramework/Shared/SSL/SSL.hpp>
+#include <ClientServerFramework/Shared/IO/SSL.hpp>
 
 #include <array>
 #include <functional>
@@ -88,4 +87,4 @@ namespace io {
 
 }
 
-#endif	// !FRAMEWORK_SERIALIZATION_IO_BASE_HPP
+#endif	// !FRAMEWORK_SHARED_IO_IO_BASE_HPP

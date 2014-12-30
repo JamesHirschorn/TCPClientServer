@@ -1,7 +1,7 @@
 /** Handle SSL options, including setting up the SSL context. */
 
-#ifndef FRAMEWORK_SHARED_SSH_HPP
-#define FRAMEWORK_SHARED_SSH_HPP
+#ifndef FRAMEWORK_SHARED_IO_SSL_HPP
+#define FRAMEWORK_SHARED_IO_SSL_HPP
 
 #include <boost/asio/ssl/context.hpp>
 
@@ -83,4 +83,4 @@ namespace io {
 
 }	// namespace io
 
-#endif	// !FRAMEWORK_SHARED_SSH_HPP
+#endif	// !FRAMEWORK_SHARED_IO_SSL_HPP

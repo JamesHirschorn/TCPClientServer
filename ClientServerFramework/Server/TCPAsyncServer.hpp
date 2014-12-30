@@ -18,8 +18,9 @@ namespace Server {
 		TCPAsyncServer(
 			boost::asio::io_service& io_service, short port, 
 			io::ssl_options const& SSL_options, 
+			bool compression,
 			Strategy const& strategy) :
-			AsyncServer(io_service, port, SSL_options, strategy)
+			AsyncServer(io_service, port, SSL_options, compression, strategy)
 		{
 		}
 	};

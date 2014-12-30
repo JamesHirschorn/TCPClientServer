@@ -7,12 +7,15 @@
 #ifndef CALCULATOR_TCPCLIENT_CLIENT_DATA_HPP
 #define CALCULATOR_TCPCLIENT_CLIENT_DATA_HPP
 
+#include <array>
 #include <cstdint>
 #include <iostream>
 #include <string>
 
 struct client_data
 {
+	static std::size_t const padding_size = 2000;
+
 	enum operation_enum {NOP = 0, ADD, SUBTRACT, MULTIPLY, DIVIDE};
 
 	class operation_type
@@ -60,11 +63,12 @@ struct client_data
 		}
 	};
 
-	std::string		client_id;	// client id
-	int32_t			id;			// request id
-	double			operand1;	// first operand
-	operation_type	operation;	// operation (+, -, *, /)
-	double			operand2;	// second operand
+	std::string		client_id;				// client id
+	int32_t			id;						// request id
+	double			operand1;				// first operand
+	operation_type	operation;				// operation (+, -, *, /)
+	double			operand2;				// second operand
+	std::array<char, padding_size> padding;	// extra padding, to demonstrate compression
 
 	/// to satisfy serializable concept
 	template <typename Archive>
@@ -75,6 +79,7 @@ struct client_data
 		ar & operand1;
 		ar & operation;
 		ar & operand2;
+		ar & padding;
 	}
 };
 

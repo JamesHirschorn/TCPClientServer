@@ -8,7 +8,7 @@
 #define FRAMEWORK_SERVER_ASYNCSERVER_HPP
 
 #include <ClientServerFramework/Server/Session.hpp>
-#include <ClientServerFramework/Shared/SSL/SSL.hpp>
+#include <ClientServerFramework/Shared/IO/SSL.hpp>
 
 #include <boost/asio/io_service.hpp>
 
@@ -28,24 +28,25 @@ namespace Server {
 		AsyncServer(
 			boost::asio::io_service& io_service, short port, 
 			io::ssl_options const& SSL_options,
+			bool compression,
 			strategy_type strategy) :
 			strategy_(strategy),
 			acceptor_(io_service, internet_protocol::endpoint(internet_protocol::v4(), port))
 		{
-			do_accept(port, SSL_options);
+			do_accept(port, SSL_options, compression);
 		}
 	private:
-		void do_accept(short port, io::ssl_options const& SSL_options)
+		void do_accept(short port, io::ssl_options const& SSL_options, bool compression)
 		{
 			// Create a new session. 
 			SessionType::pointer_type new_session = 
-				SessionType::create(acceptor_.get_io_service(), port, SSL_options, strategy_);
+				SessionType::create(acceptor_.get_io_service(), port, SSL_options, compression, strategy_);
 
 
 			// Set the connection to accept incoming client connections.
 			// uses a lambda expression for the accept handler
 			new_session->connection()->async_accept(acceptor_, 
-				[this, new_session, port, SSL_options](boost::system::error_code const& ec)
+				[this, new_session, port, SSL_options, compression](boost::system::error_code const& ec)
 			{
 				if (!ec)
 				{
@@ -53,7 +54,7 @@ namespace Server {
 					new_session->start();
 				}
 
-				do_accept(port, SSL_options);
+				do_accept(port, SSL_options, compression);
 			});
 		}
 

@@ -19,9 +19,9 @@ namespace Client {
 	public:
 		TCPConnector(
 			boost::asio::io_service& io_service,
-			io::ssl_options const& SSL_options,
+			io::ssl_options const& SSL_options, bool compression,
 			std::string const& host, std::string const& service) :
-			Connector(io_service, SSL_options, host, service)
+			Connector(io_service, SSL_options, compression, host, service)
 		{
 		}
 	};

@@ -12,7 +12,7 @@
 #define FRAMEWORK_SERVER_SESSION_HPP
 
 #include <ClientServerFramework/Server/Response.hpp>
-#include <ClientServerFramework/Shared/Serialization/ServerConnection.hpp>
+#include <ClientServerFramework/Shared/Connection/ServerConnection.hpp>
 
 #include <boost/asio/io_service.hpp>
 
@@ -44,9 +44,10 @@ namespace Server {
 		static pointer_type create(
 			boost::asio::io_service& io_service, short port,
 			io::ssl_options const& SSL_options,
+			bool compression,
 			strategy_type const& strategy)
 		{
-			return pointer_type(new Session(io_service, port, SSL_options, strategy));
+			return pointer_type(new Session(io_service, port, SSL_options, compression, strategy));
 		}
 
 		/// Starts up the session.
@@ -81,8 +82,9 @@ namespace Server {
 		Session(
 			boost::asio::io_service& io_service, short port, 
 			io::ssl_options const& SSL_options,
+			bool compression,
 			strategy_type const& strategy) :
-			connection_(new connection_type(io_service, SSL_options)), 
+			connection_(new connection_type(io_service, SSL_options, compression)), 
 			strategy_(strategy)
 		{
 			session_id_ = count++;

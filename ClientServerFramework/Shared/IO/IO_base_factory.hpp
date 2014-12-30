@@ -1,6 +1,6 @@
-#include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
-#include <ClientServerFramework/Shared/Serialization/SSL_IO.hpp>
-#include <ClientServerFramework/Shared/Serialization/UnsecuredIO.hpp>
+#include <ClientServerFramework/Shared/IO/IO_base.hpp>
+#include <ClientServerFramework/Shared/IO/SSL_IO.hpp>
+#include <ClientServerFramework/Shared/IO/UnsecuredIO.hpp>
 
 namespace io {
 

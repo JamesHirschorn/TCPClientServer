@@ -2,11 +2,11 @@
 *	Concrete strategy for SSL encrypted communications.
 */
 
-#ifndef FRAMEWORK_SERIALIZATION_SSL_IO_HPP
-#define FRAMEWORK_SERIALIZATION_SSL_IO_HPP
+#ifndef FRAMEWORK_SHARED_IO_SSL_IO_HPP
+#define FRAMEWORK_SHARED_IO_SSL_IO_HPP
 
-#include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
-#include <ClientServerFramework/Shared/SSL/SSL.hpp>
+#include <ClientServerFramework/Shared/IO/IO_base.hpp>
+#include <ClientServerFramework/Shared/IO/SSL.hpp>
 
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
@@ -163,7 +163,7 @@ namespace io {
 			char subject_name[256];
 			X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
 			X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-			std::cout << "Verifying " << subject_name << std::endl;
+			std::cout << "Verifying certificate authority: " << subject_name << std::endl;
 			return preverified;
 		}
 
@@ -185,4 +185,4 @@ namespace io {
 
 }	// namespace IO
 
-#endif // !FRAMEWORK_SERIALIZATION_SSL_IO_HPP
+#endif // !FRAMEWORK_SHARED_IO_SSL_IO_HPP

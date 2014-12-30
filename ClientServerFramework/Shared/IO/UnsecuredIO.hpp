@@ -2,10 +2,10 @@
  *	Concrete strategy for unsecured (i.e. plain out-of-the-box) communications.
  */
 
-#ifndef FRAMEWORK_SERIALIZATION_UNSECUREDIO_HPP
-#define FRAMEWORK_SERIALIZATION_UNSECUREDIO_HPP
+#ifndef FRAMEWORK_IO_UNSECUREDIO_HPP
+#define FRAMEWORK_IO_UNSECUREDIO_HPP
 
-#include <ClientServerFramework/Shared/Serialization/IO_base.hpp>
+#include <ClientServerFramework/Shared/IO/IO_base.hpp>
 
 #include <stdexcept>
 
@@ -118,4 +118,4 @@ namespace io {
 
 }	// namespace IO
 
-#endif // !FRAMEWORK_SERIALIZATION_UNSECUREDIO_HPP
+#endif // !FRAMEWORK_IO_UNSECUREDIO_HPP

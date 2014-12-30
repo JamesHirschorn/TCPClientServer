@@ -5,17 +5,20 @@
 #ifndef CALCULATOR_TCPSERVER_SERVER_DATA_HPP
 #define CALCULATOR_TCPSERVER_SERVER_DATA_HPP
 
-#include <cstdint>
-#include <string>
+#include <ClientServerCalculator/TCPClient/client_data.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/time_serialize.hpp>
 
+#include <cstdint>
+#include <string>
+
 struct server_data
 {
-	boost::posix_time::ptime	timestamp;	// server timestamp
-	int32_t						id;			// request id
-	double						result;		// calculation result
+	boost::posix_time::ptime					timestamp;	// server timestamp
+	int32_t										id;			// request id
+	double										result;		// calculation result
+	std::array<char, client_data::padding_size> padding;	// padding
 
 	/// to satisfy serializable concept
 	template <typename Archive>
@@ -24,6 +27,7 @@ struct server_data
 		ar & timestamp;
 		ar & id;
 		ar & result;
+		ar & padding;
 	}
 };
 

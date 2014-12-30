@@ -2,6 +2,8 @@
 
 **/Debug/
 
+/Scrap
+
 /build/
 **/obj/
 
@@ -18,3 +20,4 @@
 **/*.csproj.user
 /packages
 
+/Scrap
