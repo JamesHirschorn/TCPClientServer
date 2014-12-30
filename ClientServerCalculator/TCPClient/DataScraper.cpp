@@ -22,16 +22,10 @@ client_data DataScraper::get_datum() const
 	while (input_stream() && !input_stream().eof() && buffer[0] == 0)
 	{
 		input_stream().getline(buffer, max_input_length);
-/*		bool test1(input_stream());
-		bool test2 = input_stream().good();
-		bool test3 = input_stream().eof(); */
 	}
 
 	if (input_stream().bad())
 		throw std::runtime_error("Input stream corrupted.");
-
-	/*if (input_stream().eof())
-		input_stream().clear();*/
 
 	if (!buffer[0])
 		throw out_of_data();
