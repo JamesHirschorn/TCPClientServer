@@ -30,7 +30,7 @@ namespace io {
 			using namespace boost::iostreams;
 			using namespace std;
 
-			cout << "Size before compression: " << outbound.size() << endl;
+			clog << "Size before compression: " << outbound.size() << endl;
 
 			filtered.clear();
 			filtering_ostream out;
