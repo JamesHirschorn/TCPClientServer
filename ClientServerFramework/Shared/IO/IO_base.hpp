@@ -7,16 +7,19 @@
 
 #include <ClientServerFramework/Shared/IO/SSL.hpp>
 
+#include <boost/asio/buffer.hpp>
+
 #include <array>
 #include <functional>
 #include <vector>
 
 namespace io {
 
-	template<typename InternetProtocol, std::size_t header_length = 8>
+	enum side { CLIENT, SERVER };
+
+	template<typename InternetProtocol, std::size_t headerLength = 8>
 	class IO_base 
 	{
-	protected:
 	public:
 		typedef InternetProtocol internet_protocol;
 		typedef typename internet_protocol::resolver resolver_type;
@@ -27,10 +30,8 @@ namespace io {
 		typedef std::function<void(boost::system::error_code const&)> initialize_handler;
 		typedef std::function<void(boost::system::error_code const&)> async_handshake_handler; 
 		typedef std::function<void(boost::system::error_code const&)> accept_handler;
-		static std::size_t const header_length = header_length;
+		static std::size_t const header_length = headerLength;
 		typedef std::array<char, header_length> inbound_header_type;
-
-		enum side { CLIENT, SERVER };
 
 		/// Connect to the underlying socket (blocking).
 		virtual endpoint_iterator connect(

@@ -52,4 +52,4 @@ private:
 };
 
 template<typename ClientData, typename Response>
-std::array<char, client_data::padding_size> ClientActions<typename ClientData, typename Response>::padding;
+std::array<char, client_data::padding_size> ClientActions<ClientData, Response>::padding;

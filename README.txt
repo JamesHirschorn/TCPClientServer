@@ -54,19 +54,26 @@ the OpenSSL from http://www.slproweb.com/products/Win32OpenSSL.html should be
 used to make sure it works with CMake. 
 
 The only tricky thing is that boost must be built with zlib support, which is
-not well documented by Boost. The necessary boost library builds are: 
-iostreams, system, thread (?, not sure but to be safe), date_time, regex and
-serialization. On my system the boost build was done with the command:
+off by default in Windows builds (on in Linux), and is not well documented by 
+Boost. The necessary boost library builds are: iostreams, system, thread, 
+date_time, regex and serialization. On my Windows system the boost build was 
+done with the command:
 
-bjam -sZLIB_SOURCE="C:\zlib-1.2.8" --with-iostreams --with-system		     \
-	--with-thread --with-date_time --with-regex --with-serialization		 \
+bjam -sZLIB_SOURCE="C:\zlib-1.2.8" --with-iostreams --with-system           \
+	--with-thread --with-date_time --with-serialization                 \
 	--debug-configuration stage
 
 where the zlib library was installed in C:\zlib-1.2.8. Note that there cannot
-be any spaces in the zlib library path. 
+be any spaces in the zlib library path. On Linux:
+	
+./bjam -sNO_BZIP2=1 --with-iostreams --with-system                          \
+	--with-thread --with-date_time --with-serialization                 \
+	--debug-configuration stage
 
-Note: I have so far only build the project for Visual Studio 2013. There may 
-be minor changes needed to accommodate Linux or other builds.
+Note: The project has been built on Visual Studio 2013 and Debian Linux. The 
+stable version of Debian was used; however, the complier had to be upgraded
+to gcc-4.9, as gcc-4.7 has known bugs that prevented compilation. There may 
+be minor changes needed other builds.
 
 Usage
 -----

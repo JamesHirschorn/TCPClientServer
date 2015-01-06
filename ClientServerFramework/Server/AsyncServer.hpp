@@ -20,6 +20,9 @@ namespace Server {
 	template<typename SessionType, typename Strategy>
 	class AsyncServer
 	{
+
+		typedef typename SessionType::internet_protocol internet_protocol;
+		typedef typename SessionType::connection_type::acceptor_type acceptor_type;
 	public:
 		typedef Strategy strategy_type;
 
@@ -31,7 +34,7 @@ namespace Server {
 			bool compression,
 			strategy_type strategy) :
 			strategy_(strategy),
-			acceptor_(io_service, internet_protocol::endpoint(internet_protocol::v4(), port))
+			acceptor_(io_service, typename internet_protocol::endpoint(internet_protocol::v4(), port))
 		{
 			do_accept(port, SSL_options, compression);
 		}
@@ -39,7 +42,7 @@ namespace Server {
 		void do_accept(short port, io::ssl_options const& SSL_options, bool compression)
 		{
 			// Create a new session. 
-			SessionType::pointer_type new_session = 
+			auto new_session = 
 				SessionType::create(acceptor_.get_io_service(), port, SSL_options, compression, strategy_);
 
 
@@ -59,9 +62,6 @@ namespace Server {
 		}
 
 		strategy_type strategy_;
-
-		typedef typename SessionType::internet_protocol internet_protocol;
-		typedef typename SessionType::connection_type::acceptor_type acceptor_type;
 		acceptor_type acceptor_;
 	};
 

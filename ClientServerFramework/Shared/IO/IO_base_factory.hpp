@@ -14,7 +14,7 @@ namespace io {
 		static IO_base_type* create(
 			boost::asio::io_service& io_service,
 			io::ssl_options const& SSL_options,
-			typename IO_base_type::side s)
+			side s)
 		{
 			IO_base_type* io;
 

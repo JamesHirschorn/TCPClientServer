@@ -97,7 +97,7 @@ namespace Server {
 		/// connection initialization
 		void do_initialize()
 		{
-			auto self(shared_from_this());
+			auto self(this->shared_from_this());
 
 			// Capturing self with the lambda expression ensures that the Session remains alive
 			// until the handler chain has completed execution.
@@ -120,7 +120,7 @@ namespace Server {
 		{
 			using namespace boost::asio;
 
-			auto self(shared_from_this());
+			auto self(this->shared_from_this());
 
 			connection_->async_read(cdata_, 
 				[this, self, first](boost::system::error_code const& ec, std::size_t length)
@@ -149,7 +149,7 @@ namespace Server {
 		{
 			using namespace boost::asio;
 
-			auto self(shared_from_this());
+			auto self(this->shared_from_this());
 
 			connection_->async_write(response_,
 				[this, self](boost::system::error_code const& ec, std::size_t length)

@@ -1,3 +1,4 @@
+#include <cstring>
 #include <exception>
 #include <sstream>
 
@@ -13,7 +14,7 @@ client_data DataScraper::get_datum() const
 {
 	static std::streamsize const max_input_length = 1000;
 	char buffer[max_input_length];
-	memset(buffer, 0, max_input_length);
+	std::memset(buffer, 0, max_input_length);
 
 	client_data d;
 	d.client_id = client_id_;

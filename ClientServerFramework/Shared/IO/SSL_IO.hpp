@@ -5,9 +5,12 @@
 #ifndef FRAMEWORK_SHARED_IO_SSL_IO_HPP
 #define FRAMEWORK_SHARED_IO_SSL_IO_HPP
 
+#include <ClientServerFramework/Shared/defines.hpp>
 #include <ClientServerFramework/Shared/IO/IO_base.hpp>
 #include <ClientServerFramework/Shared/IO/SSL.hpp>
 
+#include <boost/asio/connect.hpp>
+#include <boost/asio/read.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
 
@@ -20,6 +23,15 @@ namespace io {
 	class SSL_IO : public
 		IO_base<InternetProtocol> 
 	{
+		typedef IO_base<InternetProtocol> base_type;
+		INHERIT(internet_protocol);
+		INHERIT(endpoint_iterator);
+		INHERIT(acceptor_type);
+		INHERIT(async_handler);
+		INHERIT(initialize_handler);
+		INHERIT(async_handshake_handler); 
+		INHERIT(accept_handler);
+		INHERIT(inbound_header_type);
 		typedef boost::asio::ssl::stream<typename internet_protocol::socket> socket_type;
 		typedef typename socket_type::lowest_layer_type lowest_layer_type;
 		typedef boost::asio::ssl::context context_type;

@@ -20,7 +20,8 @@ namespace Server {
 			io::ssl_options const& SSL_options, 
 			bool compression,
 			Strategy const& strategy) :
-			AsyncServer(io_service, port, SSL_options, compression, strategy)
+			AsyncServer<TCPSession<Strategy, ClientData, ServerData>, Strategy>(
+			    io_service, port, SSL_options, compression, strategy)
 		{
 		}
 	};

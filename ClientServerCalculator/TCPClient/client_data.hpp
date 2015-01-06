@@ -7,6 +7,8 @@
 #ifndef CALCULATOR_TCPCLIENT_CLIENT_DATA_HPP
 #define CALCULATOR_TCPCLIENT_CLIENT_DATA_HPP
 
+#include <boost/serialization/array.hpp>
+
 #include <array>
 #include <cstdint>
 #include <iostream>
@@ -63,12 +65,12 @@ struct client_data
 		}
 	};
 
-	std::string		client_id;				// client id
-	int32_t			id;						// request id
-	double			operand1;				// first operand
-	operation_type	operation;				// operation (+, -, *, /)
-	double			operand2;				// second operand
-	std::array<char, padding_size> padding;	// extra padding, to demonstrate compression
+	std::string			client_id;	// client id
+	int32_t				id;		// request id
+	double				operand1;	// first operand
+	operation_type			operation;	// operation (+, -, *, /)
+	double				operand2;	// second operand
+	std::array<char, padding_size> 	padding;	// extra padding, to demonstrate compression
 
 	/// to satisfy serializable concept
 	template <typename Archive>

@@ -3,9 +3,9 @@
  *	See Session.hpp for documentation.
  */
 
-#include <boost/asio/ip/tcp.hpp>
-
 #include <ClientServerFramework/Server/Session.hpp>
+
+#include <boost/asio/ip/tcp.hpp>
 
 namespace Server {
 

@@ -15,6 +15,15 @@ namespace io {
 	class UnsecuredIO : public 
 		IO_base<InternetProtocol>
 	{
+		typedef IO_base<InternetProtocol> base_type;
+	        INHERIT(internet_protocol);
+		INHERIT(endpoint_iterator);
+		INHERIT(acceptor_type);
+		INHERIT(async_handler);
+		INHERIT(initialize_handler);
+		INHERIT(async_handshake_handler); 
+		INHERIT(accept_handler);
+		INHERIT(inbound_header_type);		
 		typedef typename internet_protocol::socket socket_type;
 	public:
 		/// ctor

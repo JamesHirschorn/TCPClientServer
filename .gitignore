@@ -1,6 +1,12 @@
-**/bin/
+/bin/
 
 **/Debug/
+
+.directory
+.*~
+*~
+.kdev*
+*.kdev*
 
 /Scrap
 
@@ -19,5 +25,3 @@
 
 **/*.csproj.user
 /packages
-
-/Scrap

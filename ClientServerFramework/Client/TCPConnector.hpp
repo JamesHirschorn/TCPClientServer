@@ -21,7 +21,8 @@ namespace Client {
 			boost::asio::io_service& io_service,
 			io::ssl_options const& SSL_options, bool compression,
 			std::string const& host, std::string const& service) :
-			Connector(io_service, SSL_options, compression, host, service)
+			Connector<boost::asio::ip::tcp, ClientData, Response>(
+			  io_service, SSL_options, compression, host, service)
 		{
 		}
 	};

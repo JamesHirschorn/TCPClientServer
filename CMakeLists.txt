@@ -4,7 +4,7 @@
 # (C) 2014 James Hirschorn                      #
 #################################################
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.9)
 
 project(TCPClientServer)
 
@@ -28,23 +28,31 @@ macro(get_WIN32_WINNT version)
     endif()
 endmacro()
 
-get_WIN32_WINNT(ver)
-add_definitions(-D_WIN32_WINNT=${ver} -D_SCL_SECURE_NO_WARNINGS) 
+if(WIN32)
+  get_WIN32_WINNT(ver)
+  add_definitions(-D_WIN32_WINNT=${ver} -D_SCL_SECURE_NO_WARNINGS) 
+endif(WIN32)
 
 # Set compiler flags and options. 
-# Here it is setting the Visual Studio warning level to 4
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+if(UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif(UNIX)
 #message ("cxx Flags: " ${CMAKE_CXX_FLAGS})
 
 #----------------------------
 # LIBRARIES
 #----------------------------
 
-# For some reason, CMake fails when the specific Boost libraries are required.
+# For some reason, in Windows CMake fails when the specific Boost libraries are required.
 # We use link_directories as a work around (see below).
-find_package(Boost 1.57 REQUIRED)
+#if(WIN32)
+#  find_package(Boost 1.57 REQUIRED)
+#else(WIN32)
+  find_package(Boost 1.57 REQUIRED system thread iostreams serialization date_time)
+#endif(WIN32)
+
 if(NOT ${Boost_FOUND})
-	set(BOOST_ROOT $ENV{Boost_DIR} CACHE PATH "Boost library root directory")
+    set(BOOST_ROOT $ENV{Boost_DIR} CACHE PATH "Boost library root directory")
 endif(NOT ${Boost_FOUND})
 
 find_package(OpenSSL)
