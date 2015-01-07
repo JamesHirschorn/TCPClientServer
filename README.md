@@ -1,6 +1,9 @@
 TCPClientServer
 ===============
 
+Copyright (C) 2015 James Hirschorn <James.Hirschorn@quantitative-technologies.com>
+----------------------------------------------------------------------------------
+
 Overview
 --------
 
