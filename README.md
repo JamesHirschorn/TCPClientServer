@@ -86,11 +86,11 @@ executables with no command line arguments. They are Calculator-TCPClient
 (the client), Calculator-TCPServer (the server) and DataGenerator which 
 generates a stream for the client to scrape. Some basic examples:
 
-Calculator-TCPServer.exe 12345
+``Calculator-TCPServer.exe 12345``
 
 runs the server listening on port 12345. 
 
-DataGenerator.exe 10 | Calculator-TCPClient.exe James localhost 12345
+``DataGenerator.exe 10 | Calculator-TCPClient.exe James localhost 12345``
 
 runs a client with client ID "James" connecting to localhost port 12345, 
 with 10 requests fed to the client.
