@@ -107,7 +107,7 @@ protocol, e.g. SSL or plain sockets. The sockets themselves are completely
 encapsulated in IO_base and the derived classes (SSL_IO.hpp and 
 Unsecured.hpp). The strategy pattern is also used to specify input and 
 output filters. This is currently used for compression (see Filter_base.hpp,
-DefaultFilter.hpp and CompressionFilter.hpp). A singtleton is used for the 
+DefaultFilter.hpp and CompressionFilter.hpp). A singleton is used for the 
 client message queue.
 
 The code is mostly very simple with short code files. The "heavy-lifting" is
