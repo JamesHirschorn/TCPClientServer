@@ -59,8 +59,8 @@ used to make sure it works with CMake.
 The only tricky thing is that boost must be built with zlib support, which is
 off by default in Windows builds (on in Linux), and is not well documented by 
 Boost. The necessary boost library builds are: iostreams, system, thread, 
-date_time, regex and serialization. On my Windows system the boost build was 
-done with the command:
+date_time and serialization. On my Windows system the boost build was done 
+with the command:
 
 bjam -sZLIB_SOURCE="C:\zlib-1.2.8" --with-iostreams --with-system           \
 	--with-thread --with-date_time --with-serialization                 \
