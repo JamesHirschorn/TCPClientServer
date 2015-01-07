@@ -69,8 +69,8 @@ with the command:
 where the zlib library was installed in C:\zlib-1.2.8. Note that there cannot
 be any spaces in the zlib library path. On Linux:
 	
-    ./bjam -sNO_BZIP2=1 --with-iostreams --with-system                          \    
-	    --with-thread --with-date_time --with-serialization                 \    
+    ./bjam -sNO_BZIP2=1 --with-iostreams --with-system                          \  
+            --with-thread --with-date_time --with-serialization                 \  
 	    --debug-configuration stage``
 
 Note: The project has been built on Visual Studio 2013 and Debian Linux. The 
