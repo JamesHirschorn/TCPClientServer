@@ -45,11 +45,11 @@ endif(UNIX)
 
 # For some reason, in Windows CMake fails when the specific Boost libraries are required.
 # We use link_directories as a work around (see below).
-#if(WIN32)
-#  find_package(Boost 1.57 REQUIRED)
-#else(WIN32)
-  find_package(Boost 1.57 REQUIRED system thread iostreams serialization date_time)
-#endif(WIN32)
+if(WIN32)
+	find_package(Boost 1.57 REQUIRED)
+else(WIN32)
+	find_package(Boost 1.57 REQUIRED system thread iostreams serialization date_time)
+endif(WIN32)
 
 if(NOT ${Boost_FOUND})
     set(BOOST_ROOT $ENV{Boost_DIR} CACHE PATH "Boost library root directory")
